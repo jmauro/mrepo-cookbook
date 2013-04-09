@@ -1,0 +1,33 @@
+#  ___ _  _ ___ ___    ___ ___  _  _ _____ ___  ___  _    
+# / __| || | __| __|  / __/ _ \| \| |_   _| _ \/ _ \| |   
+#| (__| __ | _|| _|  | (_| (_) | .` | | | |   / (_) | |__ 
+# \___|_||_|___|_|    \___\___/|_|\_| |_| |_|_\\___/|____|
+
+### Configuration file for mrepo
+[main]
+## Architecture to get
+arch = <%= @mrepo[:arch] %>
+
+# The location of the ISO images and RPM files
+srcdir = <%= @mrepo[:srcdir] %>
+
+## The location of the generated repositories
+wwwdir = <%= @mrepo[:wwwdir] %>
+
+## The location of the dist config files
+confdir = <%= @mrepo[:config_dir] %>
+
+## The location of the cachedir (used by yum)
+cachedir = <%= @mrepo[:cachedir] %>
+
+## The location of the lockdir
+lockdir = <%= @mrepo[:lockdir] %>
+
+## The location of the logfile
+logfile = <%= @mrepo[:logfile] %>
+
+## Sent report to
+mailto = <%= @mrepo[:mailto] %>
+
+## SMTP servers
+smtp-server = <%= @mrepo[:smtp_server] %>
