@@ -6,27 +6,97 @@
 #
 #
 
+# Example of use:
+# mirror_repo 'CentOS-6' do
+#   description 'Repository CentOS 5.6 32 bit'
+#   release   '5.6'
+#   arch      'i386'
+#   metadata  
+#   ensure    'present'
+#   update    'nightly'
+#   urls      {
+#     :addons      => 'rsync://mirrors.kernel.org/centos/$release/addons/$arch/',
+#     :centosplus  => 'rsync://mirrors.kernel.org/centos/$release/centosplus/$arch/',
+#     :updates     => 'rsync://mirrors.kernel.org/centos/$release/updates/$arch/',
+#   }
 define  :mirror_repo,
-        :description,
-        :release,
-        :arch,
-        :metadata,
-        :iso,
-        :urls,
-        :hour         => '0',
-        :ensure       => 'present',
-        :update       => 'weekly',
-        :gentimeout   => '3600' do
+        :description => nil,
+        :release     => nil,
+        :arch        => nil,
+        :metadata    => nil,
+        :iso         => nil,
+        :urls        => nil,
+        :hour        => '0',
+        :ensure      => 'present',
+        :update      => 'weekly',
+        :gentimeout  => '3600' do
 
   include_recipe 'mrepo'
 
-  # --[ Get the parameters ]--
-  mirror_name    = params[:name]
-  mrepo_dir_conf = "#{node[:mrepo][:config_dir]}/#{mirror_name}.conf"
-  src_dir = node[:mrepo][:srcdir]
-  www_dir = "#{node[:mrepo][:wwwdir]}/#{mirror_name}"
+  acceptable_ensure   = [ 'present', 'absent' ]
+  acceptable_metadata = [ 'yum', 'apt', 'repomd', 'repoview' ]
+  acceptable_update   = [ 'now', 'weekly', 'nightly', 'never' ]
+  acceptable_arch     = [ 'i386', 'i586', 'x86_64', 'ppc', 's390', 's390x', 'ia64' ]
 
-  if params[:ensure] == 'present'
+
+  # --[ Get the parameters ]--
+  release        = params[:release]
+  iso            = params[:iso]
+  urls           = params[:urls]
+  mirror_name    = params[:name]
+  create         = params[:ensure]
+  update         = params[:update]
+  src_dir        = node[:mrepo][:srcdir]
+  www_dir        = "#{node[:mrepo][:wwwdir]}/#{mirror_name}"
+  mrepo_dir_conf = "#{node[:mrepo][:config_dir]}/#{mirror_name}.conf"
+  metadata       = if params[:metadata].is_a? Array; then params[:metadata].join(' '); else params[:metadata]; end
+
+  # --[ Meta could be an array ]--
+  if params[:metadata].is_a? Array
+    metadata   = params[:metadata].join(' ')
+    array_meta = params[:metadata]
+  else
+    metadata   = params[:metadata]
+    array_meta = [ metadata ]
+  end
+
+  # --[ Arch could also be an array ]--
+  if params[:arch].is_a? Array
+    arch       = params[:arch].join(' ')
+    array_arch = params[:arch]
+  else
+    arch       = params[:arch]
+    array_arch = [ arch ]
+  end
+  # --[ Check arguments ]--
+  invalide_array = {
+    :invalide_ensure => {
+      :title => 'ensure',
+      :value => [ create ] - acceptable_ensure,
+    },
+    :invalide_update => {
+      :title => 'update',
+      :value => [ update ] - acceptable_update,
+    },
+    :invalide_metadata => {
+      :title => 'metadata',
+      :value => array_meta - acceptable_metadata,
+    },
+    :invalide_arch => {
+      :title => 'arch',
+      :value => array_arch - acceptable_arch,
+    },
+  }
+
+  invalide_options = %w(invalide_ensure invalide_metadata invalide_update invalide_arch)
+  invalide_options.each do |option|
+    if invalide_array[:"#{option}"][:value].size == 1
+      Chef::Application.fatal! "The passed value 'invalide_array[:"#{option}"][:value]' for the option 'invalide_array[:"#{option}"][:title]' is not an acceptable value"
+    end
+  end
+
+  if create == 'present'
+
     Chef::Log.info ">>> [:mirror_repo] Adding repo '#{mirror_name}'"
     template mrepo_dir_conf do
       source 'repo.conf.erb'
@@ -144,7 +214,7 @@ define  :mirror_repo,
     end
 
     Chef::Log.info ">>> [:mirror_repo] Removing files for repo '#{mirror_name}'"
-    dir_to_remove = %W( www_dir mrepo_dir_conf)
+    dir_to_remove = %W(www_dir mrepo_dir_conf)
     dir_to_remove.each do |dir|
       directory dir do
         recursive true

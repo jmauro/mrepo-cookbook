@@ -10,10 +10,10 @@ release = <%= @release %>
 arch = <%= @arch %>
 <% end -%>
 <% if defined?(@metadata) -%>
-metadata = <%= if metadata.is_a? Array; then metadata.join(' '); else metadata; end %>
+metadata = <%= @metadata %>
 <% end -%>
-<% unless iso.empty? -%>
-iso = <%= iso %>
+<% if defined?(@iso) -%>
+iso = <%= @iso %>
 <% end -%>
 <% urls.keys.sort.each do |name| -%>
 <%= name %> = <%= urls[name] %>
