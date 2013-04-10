@@ -52,5 +52,3 @@ dir_create.each do |dir|
     action :create
   end
 end
-
-
