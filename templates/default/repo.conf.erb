@@ -4,17 +4,23 @@
 # \___|_||_\___|_|    \___\___/_||_\__|_| \___/_|
                                                 
 [<%= @name %>]
-name = <%= @repotitle %>
+<% if ! @arch.nil? -%>
+name = <%= @description %>
+<%end -%>
+<% if ! @release.nil? -%>
 release = <%= @release %>
-<% if defined?(@arch) -%>
+<% end -%>
+<% if ! @arch.nil? -%>
 arch = <%= @arch %>
 <% end -%>
-<% if defined?(@metadata) -%>
+<% if ! @metadata.nil? -%>
 metadata = <%= @metadata %>
 <% end -%>
-<% if defined?(@iso) -%>
+<% if ! @iso.nil? -%>
 iso = <%= @iso %>
 <% end -%>
-<% urls.keys.sort.each do |name| -%>
-<%= name %> = <%= urls[name] %>
+<% if ! @urls.nil? -%>
+<% @urls.keys.sort.each do |name| -%>
+<%= name %> = <%= @urls[name] %>
+<% end -%>
 <% end -%>
