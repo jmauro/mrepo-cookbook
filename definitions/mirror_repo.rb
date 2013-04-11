@@ -119,7 +119,7 @@ define  :mirror_repo,
       notifies :run, "execute[Generate mrepo for #{mirror_name}]"
     end
 
-    Chef::Log.info ">>> [:mirror_repo] Generate repo '#{mirror_name}'"
+    Chef::Log.info ">>> [:mirror_repo] Generating repo '#{mirror_name}'"
     execute "Generate mrepo for #{mirror_name}" do
       path ['/usr/bin','/bin']
       command "mrepo -g #{mirror_name}"
@@ -131,7 +131,6 @@ define  :mirror_repo,
       action :nothing
     end
 
-    Chef::Log.info ">>> [:mirror_repo] Creating web directory for #{mirror_name}"
     directory www_dir do
       owner "root"
       group "root"
@@ -155,7 +154,6 @@ define  :mirror_repo,
       end
 
       # --[ Removing Crons ]--
-      Chef::Log.info ">>> [:mirror_repo] Removing any remaining cron for '#{mirror_name}'"
       cron "Nightly synchronize repo #{mirror_name}" do
 
         action :delete
