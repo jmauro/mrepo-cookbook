@@ -100,7 +100,6 @@ define  :mirror_repo,
   end
 
   if create == 'create'
-
     Chef::Log.info ">>> [:mirror_repo] Adding repo '#{mirror_name}'"
     template mrepo_dir_conf do
       source 'repo.conf.erb'
