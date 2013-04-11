@@ -31,3 +31,31 @@ mailto = <%= @mrepo[:mailto] %>
 
 ## SMTP servers
 smtp-server = <%= @mrepo[:smtp_server] %>
+
+## Default output (put this to yes if you want mrepo to be silent by default)
+quiet = no
+
+## What repository metadata do you want to generate ? (Most generic: repomd)
+metadata = repomd
+
+
+# --[ Command line options ]--
+## createrepo
+createrepocmd = /usr/bin/createrepo
+createrepo-options = -p -d
+
+## repoview
+repoviewcmd = /usr/bin/repoview
+repoview-options =
+
+## lftp
+# Clean up packages that are not on the sending side ?
+lftp-cleanup = yes
+# Add extra options to lftp mirror command
+lftp-mirror-options = -c -P
+
+## rsync
+# Add extra options to rsync
+rsync-options = -rtHL --partial
+# Clean up packages that are not on the sending side ?
+rsync-cleanup = yes
