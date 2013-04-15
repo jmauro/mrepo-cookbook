@@ -24,6 +24,7 @@ define  :mirror_repo,
         :release     => nil,
         :arch        => nil,
         :metadata    => nil,
+        :key_url     => nil,
         :iso         => nil,
         :urls        => nil,
         :hour        => '0',
@@ -42,6 +43,7 @@ define  :mirror_repo,
   # --[ Get the parameters ]--
   release        = params[:release]
   iso            = params[:iso]
+  key_url        = params[:key_url]
   urls           = params[:urls]
   mirror_name    = params[:name]
   create         = params[:action]
@@ -49,6 +51,7 @@ define  :mirror_repo,
   description    = params[:description]
   gentimeout     = params[:gentimeout].to_i
   src_dir        = node[:mrepo][:srcdir]
+  key_repo       = node[:mrepo][:keydir]
   www_dir        = "#{node[:mrepo][:wwwdir]}/#{mirror_name}"
   mrepo_dir_conf = "#{node[:mrepo][:config_dir]}/#{mirror_name}.conf"
   metadata       = if params[:metadata].is_a? Array; then params[:metadata].join(' '); else params[:metadata]; end
@@ -96,6 +99,15 @@ define  :mirror_repo,
       title = [:"#{option}"][:title]
       value = [:"#{option}"][:value]
       Chef::Application.fatal! "The passed value [#{value}] for the option [#{title}] is not an acceptable value"
+    end
+  end
+
+  unless key_url.nil?
+    remote_file "#{key_repo}/#{mirror_name}" do
+      owner 'root'
+      group 'root'
+      mode '0644'
+      source key_url
     end
   end
 

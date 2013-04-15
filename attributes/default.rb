@@ -19,6 +19,7 @@ default[:mrepo][:srcdir]   = '/var/mrepo'
 default[:mrepo][:wwwdir]   = '/var/www/mrepo'
 default[:mrepo][:lockdir]  = '/var/run/mrepo'
 default[:mrepo][:cachedir] = '/var/cache/mrepo'
+default[:mrepo][:keydir]   = "#{node[:mrepo][:wwwdir]}/keys"
 default[:mrepo][:logfile]  = '/var/log/mrepo.log'
 
 # --[ Repo to create ]--

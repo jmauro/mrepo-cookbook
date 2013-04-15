@@ -41,7 +41,14 @@ template '/etc/logrotate.d/mrepo' do
 end
 
 # --[ Make directory are present ]--
-dir_create = %W( "#{node[:mrepo][:srcdir]}" "#{node[:mrepo][:wwwdir]}" "#{node[:mrepo][:lockdir]}" "#{node[:mrepo][:cachedir]})
+dir_create = [
+  "#{node[:mrepo][:keydir]}",
+  "#{node[:mrepo][:srcdir]}",
+  "#{node[:mrepo][:wwwdir]}",
+  "#{node[:mrepo][:lockdir]}",
+  "#{node[:mrepo][:cachedir]}",
+  "#{node[:mrepo][:config_dir]}",
+  ]
 dir_create.each do |dir|
   directory dir do
     owner 'root'
