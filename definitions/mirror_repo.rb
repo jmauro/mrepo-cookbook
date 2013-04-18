@@ -14,11 +14,12 @@
 #   metadata  [ 'repomd' , 'yum' ]
 #   action    'create'
 #   update    'nightly'
-#   urls      {
+#   urls      ({
 #     :addons      => 'rsync://mirrors.kernel.org/centos/$release/addons/$arch/',
 #     :centosplus  => 'rsync://mirrors.kernel.org/centos/$release/centosplus/$arch/',
 #     :updates     => 'rsync://mirrors.kernel.org/centos/$release/updates/$arch/',
-#   }
+#   })
+# end
 define  :mirror_repo,
         :description => nil,
         :release     => nil,
@@ -102,16 +103,22 @@ define  :mirror_repo,
     end
   end
 
-  unless key_url.nil?
-    remote_file "#{key_repo}/#{mirror_name}" do
-      owner 'root'
-      group 'root'
-      mode '0644'
-      source key_url
-    end
-  end
 
   if create == 'create'
+    unless key_url.nil? 
+      key_name = /.*\/(.*)$/.match(key_url)[1]
+      execute "Getting key file #{key_name}" do
+        path ['/bin','/usr/bin']
+        command "wget #{key_url} -O #{key_repo}/#{key_name}"
+        creates "#{key_repo}/#{key_name}"
+        user "root"
+        group "root"
+        timeout 3600
+      
+        action :run
+      end
+    end
+
     Chef::Log.info ">>> [:mirror_repo] Adding repo '#{mirror_name}'"
     template mrepo_dir_conf do
       source 'repo.conf.erb'
@@ -133,7 +140,7 @@ define  :mirror_repo,
     Chef::Log.info ">>> [:mirror_repo] Generating repo '#{mirror_name}'"
     execute "Generate mrepo for #{mirror_name}" do
       path ['/usr/bin','/bin']
-      command "mrepo -g #{mirror_name}"
+      command "mrepo -g \"#{mirror_name}\""
       cwd src_dir
       user 'root'
       group 'root'
@@ -155,7 +162,7 @@ define  :mirror_repo,
       Chef::Log.info ">>> [:mirror_repo] Synchronizing now repo '#{mirror_name}'"
       execute "Synchronize repo #{mirror_name}" do
         path ['/usr/bin','/bin']
-        command "/usr/bin/mrepo -gu #{mirror_name}"
+        command "/usr/bin/mrepo -gu \"#{mirror_name}\""
         cwd src_dir
         user "root"
         group "root"
@@ -182,7 +189,7 @@ define  :mirror_repo,
         hour params[:hour]
         minute '0'
         path "/bin:/usr/bin"
-        command "/usr/bin/mrepo -gu #{mirror_name}"
+        command "/usr/bin/mrepo -gu \"#{mirror_name}\""
         user "root"
         home src_dir
         shell "/bin/bash"
@@ -203,7 +210,7 @@ define  :mirror_repo,
         hour params[:hour]
         minute '0'
         path "/bin:/usr/bin"
-        command "/usr/bin/mrepo -gu #{mirror_name}"
+        command "/usr/bin/mrepo -gu \"#{mirror_name}\""
         user "root"
         home src_dir
         shell "/bin/bash"
