@@ -19,6 +19,8 @@
 #     :centosplus  => 'rsync://mirrors.kernel.org/centos/$release/centosplus/$arch/',
 #     :updates     => 'rsync://mirrors.kernel.org/centos/$release/updates/$arch/',
 #   })
+# end
+
 define  :mirror_repo,
         :description => nil,
         :release     => nil,
