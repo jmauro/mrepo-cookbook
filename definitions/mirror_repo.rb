@@ -14,11 +14,13 @@
 #   metadata  [ 'repomd' , 'yum' ]
 #   action    'create'
 #   update    'nightly'
-#   urls      {
+#   urls      ({
 #     :addons      => 'rsync://mirrors.kernel.org/centos/$release/addons/$arch/',
 #     :centosplus  => 'rsync://mirrors.kernel.org/centos/$release/centosplus/$arch/',
 #     :updates     => 'rsync://mirrors.kernel.org/centos/$release/updates/$arch/',
-#   }
+#   })
+# end
+
 define  :mirror_repo,
         :description => nil,
         :release     => nil,
@@ -36,7 +38,7 @@ define  :mirror_repo,
 
   acceptable_action   = [ 'create', 'delete' ]
   acceptable_metadata = [ 'yum', 'apt', 'repomd', 'repoview' ]
-  acceptable_update   = [ 'now', 'weekly', 'nightly', 'never' ]
+  acceptable_update   = [ 'now', 'weekly', 'nightly', 'never', 'daily' ]
   acceptable_arch     = [ 'i386', 'i586', 'x86_64', 'ppc', 's390', 's390x', 'ia64' ]
 
 
@@ -76,42 +78,53 @@ define  :mirror_repo,
   # --[ Check arguments ]--
   invalide_array = {
     :invalide_action => {
-      :title => 'action',
-      :value => [ create ] - acceptable_action,
+      :title      => 'action',
+      :value      => [ create ] - acceptable_action,
+      :acceptable => acceptable_action,
     },
     :invalide_update => {
-      :title => 'update',
-      :value => [ update ] - acceptable_update,
+      :title      => 'update',
+      :value      => [ update ] - acceptable_update,
+      :acceptable => acceptable_update,
     },
     :invalide_metadata => {
-      :title => 'metadata',
-      :value => array_meta - acceptable_metadata,
+      :title      => 'metadata',
+      :value      => array_meta - acceptable_metadata,
+      :acceptable => acceptable_metadata,
     },
     :invalide_arch => {
-      :title => 'arch',
-      :value => array_arch - acceptable_arch,
+      :title      => 'arch',
+      :value      => array_arch - acceptable_arch,
+      :acceptable => acceptable_arch,
     },
   }
 
   invalide_options = %w(invalide_action invalide_metadata invalide_update invalide_arch)
   invalide_options.each do |option|
     if invalide_array[:"#{option}"][:value].size == 1
-      title = [:"#{option}"][:title]
-      value = [:"#{option}"][:value]
-      Chef::Application.fatal! "The passed value [#{value}] for the option [#{title}] is not an acceptable value"
-    end
-  end
-
-  unless key_url.nil?
-    remote_file "#{key_repo}/#{mirror_name}" do
-      owner 'root'
-      group 'root'
-      mode '0644'
-      source key_url
+      title      = invalide_array[:"#{option}"][:title]
+      value      = invalide_array[:"#{option}"][:value]
+      acceptable = invalide_array[:"#{option}"][:acceptable]
+      Chef::Log.info " >>> [:mirror_repo] The passed value #{value} for the option [#{title}] is not an acceptable value for \"#{mirror_name}\""
+      Chef::Application.fatal! ">>> [:mirror_repo] --> Valide argument are: #{acceptable}"
     end
   end
 
   if create == 'create'
+    unless key_url.nil?
+      key_name = /.*\/(.*)$/.match(key_url)[1]
+      execute "Getting key file #{key_name}" do
+        path ['/bin','/usr/bin']
+        command "wget #{key_url} -O #{key_repo}/#{key_name}"
+        creates "#{key_repo}/#{key_name}"
+        user 'root'
+        group 'root'
+        timeout 3600
+
+        action :run
+      end
+    end
+
     Chef::Log.info ">>> [:mirror_repo] Adding repo '#{mirror_name}'"
     template mrepo_dir_conf do
       source 'repo.conf.erb'
@@ -133,7 +146,7 @@ define  :mirror_repo,
     Chef::Log.info ">>> [:mirror_repo] Generating repo '#{mirror_name}'"
     execute "Generate mrepo for #{mirror_name}" do
       path ['/usr/bin','/bin']
-      command "mrepo -g #{mirror_name}"
+      command "mrepo -g \"#{mirror_name}\""
       cwd src_dir
       user 'root'
       group 'root'
@@ -155,7 +168,7 @@ define  :mirror_repo,
       Chef::Log.info ">>> [:mirror_repo] Synchronizing now repo '#{mirror_name}'"
       execute "Synchronize repo #{mirror_name}" do
         path ['/usr/bin','/bin']
-        command "/usr/bin/mrepo -gu #{mirror_name}"
+        command "/usr/bin/mrepo -gu \"#{mirror_name}\""
         cwd src_dir
         user "root"
         group "root"
@@ -175,14 +188,14 @@ define  :mirror_repo,
         action :delete
       end
 
-    elsif params[:update] =~ /(?i-mx:nightly)/
+    elsif params[:update] =~ /(?i-mx:nightly|daily)/
       Chef::Log.info ">>> [:mirror_repo] Setting nightly cron for '#{mirror_name}'"
       # --[ Update repo is done every night ]--
       cron "Nightly synchronize repo #{mirror_name}" do
         hour params[:hour]
         minute '0'
         path "/bin:/usr/bin"
-        command "/usr/bin/mrepo -gu #{mirror_name}"
+        command "/usr/bin/mrepo -gu \"#{mirror_name}\""
         user "root"
         home src_dir
         shell "/bin/bash"
@@ -203,7 +216,7 @@ define  :mirror_repo,
         hour params[:hour]
         minute '0'
         path "/bin:/usr/bin"
-        command "/usr/bin/mrepo -gu #{mirror_name}"
+        command "/usr/bin/mrepo -gu \"#{mirror_name}\""
         user "root"
         home src_dir
         shell "/bin/bash"
