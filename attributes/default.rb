@@ -35,4 +35,3 @@ default[:mrepo][:arch] = 'x86_64'
 # --[ Report ]--
 default[:mrepo][:mailto]      = 'root@localhost'
 default[:mrepo][:smtp_server] = 'localhost'
-
