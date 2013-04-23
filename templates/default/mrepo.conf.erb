@@ -39,22 +39,22 @@ quiet = no
 metadata = repomd
 
 
-# --[ Command line options ]--
-## createrepo
+# [ Command line options ]
+# --[ createrepo ]--
 createrepocmd = /usr/bin/createrepo
 createrepo-options = -p -d
 
-## repoview
+# --[ repoview ]--
 repoviewcmd = /usr/bin/repoview
 repoview-options =
 
-## lftp
+# --[ lftp ]--
 # Clean up packages that are not on the sending side ?
 lftp-cleanup = yes
 # Add extra options to lftp mirror command
 lftp-mirror-options = -c -P
 
-## rsync
+# --[ rsync ]--
 # Add extra options to rsync
 rsync-options = -rtHL --partial
 # Clean up packages that are not on the sending side ?

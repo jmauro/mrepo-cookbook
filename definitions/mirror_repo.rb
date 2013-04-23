@@ -1,7 +1,7 @@
 #
-# Cookbook Name::	mirror_repo.rb
+# Cookbook Name::	mrepo
 # Description::		Definition to add remote repository to mrepo
-# Recipe::				mrepo
+# Recipe::				mirror_repo.rb
 # Author::        Jeremy MAURO (j.mauro@criteo.com)
 #
 #
@@ -57,6 +57,10 @@ define  :mirror_repo,
   www_dir        = "#{node[:mrepo][:wwwdir]}/#{mirror_name}"
   mrepo_dir_conf = "#{node[:mrepo][:config_dir]}/#{mirror_name}.conf"
   metadata       = if params[:metadata].is_a? Array; then params[:metadata].join(' '); else params[:metadata]; end
+  
+  # --[ Random number based on IP ]--
+  ip1, ip2, ip3, ip4 = node[:ipaddress].split('.')
+  minute_random      = (ip4.to_i * 256 + ip3.to_i )% 3600
 
   # --[ Meta could be an array ]--
   if params[:metadata].is_a? Array
@@ -125,9 +129,10 @@ define  :mirror_repo,
       end
     end
 
-    Chef::Log.info ">>> [:mirror_repo] Adding repo '#{mirror_name}'"
+    Chef::Log.info " >>> [:mirror_repo] Adding repo '#{mirror_name}'"
     template mrepo_dir_conf do
       source 'repo.conf.erb'
+      cookbook 'mrepo'
       owner 'root'
       group 'root'
       mode  '0644'
@@ -143,7 +148,7 @@ define  :mirror_repo,
       notifies :run, "execute[Generate mrepo for #{mirror_name}]"
     end
 
-    Chef::Log.info ">>> [:mirror_repo] Generating repo '#{mirror_name}'"
+    Chef::Log.info " >>> [:mirror_repo] Generating repo '#{mirror_name}'"
     execute "Generate mrepo for #{mirror_name}" do
       path ['/usr/bin','/bin']
       command "mrepo -g \"#{mirror_name}\""
@@ -165,7 +170,7 @@ define  :mirror_repo,
 
     if params[:update] =~ /(?i-mx:now)/
       # --[ Update repo is now ]--
-      Chef::Log.info ">>> [:mirror_repo] Synchronizing now repo '#{mirror_name}'"
+      Chef::Log.info " >>> [:mirror_repo] Synchronizing now repo '#{mirror_name}'"
       execute "Synchronize repo #{mirror_name}" do
         path ['/usr/bin','/bin']
         command "/usr/bin/mrepo -gu \"#{mirror_name}\""
@@ -189,13 +194,13 @@ define  :mirror_repo,
       end
 
     elsif params[:update] =~ /(?i-mx:nightly|daily)/
-      Chef::Log.info ">>> [:mirror_repo] Setting nightly cron for '#{mirror_name}'"
+      Chef::Log.info " >>> [:mirror_repo] Setting nightly cron for '#{mirror_name}'"
       # --[ Update repo is done every night ]--
       cron "Nightly synchronize repo #{mirror_name}" do
         hour params[:hour]
-        minute '0'
+        minute minute_random
         path "/bin:/usr/bin"
-        command "/usr/bin/mrepo -gu \"#{mirror_name}\""
+        command "[ -f \"#{mrepo_dir_conf}\" ] && /usr/bin/mrepo -gu \"#{mirror_name}\""
         user "root"
         home src_dir
         shell "/bin/bash"
@@ -209,14 +214,14 @@ define  :mirror_repo,
       end
 
     elsif params[:update] =~ /(?i-mx:weekly)/
-      Chef::Log.info ">>> [:mirror_repo] Setting weekly cron for '#{mirror_name}'"
+      Chef::Log.info " >>> [:mirror_repo] Setting weekly cron for '#{mirror_name}'"
       # --[ Update repo is done every week ]--
       cron "Weekly synchronize repo #{mirror_name}" do
         weekday '0'
         hour params[:hour]
-        minute '0'
+        minute minute_random
         path "/bin:/usr/bin"
-        command "/usr/bin/mrepo -gu \"#{mirror_name}\""
+        command "[ -f \"#{mrepo_dir_conf}\" ] && /usr/bin/mrepo -gu \"#{mirror_name}\""
         user "root"
         home src_dir
         shell "/bin/bash"
@@ -230,8 +235,8 @@ define  :mirror_repo,
       end
     end
   else
-    Chef::Log.info ">>> [:mirror_repo] Removing repo '#{mirror_name}'"
-    Chef::Log.info ">>> [:mirror_repo] Umounting iso for repo '#{mirror_name}'"
+    Chef::Log.info " >>> [:mirror_repo] Removing repo '#{mirror_name}'"
+    Chef::Log.info " >>> [:mirror_repo] Umounting iso for repo '#{mirror_name}'"
     execute "Unmount any mirrored ISOs for #{mirror_name}" do
       path ['/usr/bin', '/bin', '/usr/sbin', '/sbin']
       command "umount #{www_dir}/disc*"
@@ -240,7 +245,7 @@ define  :mirror_repo,
       if_only "/bin/mount | /bin/grep #{www_dir}/disk"
     end
 
-    Chef::Log.info ">>> [:mirror_repo] Removing files for repo '#{mirror_name}'"
+    Chef::Log.info " >>> [:mirror_repo] Removing files for repo '#{mirror_name}'"
     dir_to_remove = %W(www_dir mrepo_dir_conf)
     dir_to_remove.each do |dir|
       directory dir do
@@ -250,7 +255,7 @@ define  :mirror_repo,
       end
     end
 
-    Chef::Log.info ">>> [:mirror_repo] Removing any remaining cron for '#{mirror_name}'"
+    Chef::Log.info " >>> [:mirror_repo] Removing any remaining cron for '#{mirror_name}'"
     cron "Nightly synchronize repo #{mirror_name}" do
 
       action :delete
