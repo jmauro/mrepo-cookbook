@@ -8,7 +8,7 @@
 #
 
 # --[ Packages definition ]--
-default[:mrepo][:packages] = [ 'mrepo', 'rsync', 'lftp', 'createrepo', 'hardlink', 'repoview', 'yum-arch' ]
+default[:mrepo][:packages] = [ 'mrepo', 'rsync', 'lftp', 'createrepo', 'hardlink', 'repoview', 'yum-arch', 'fuse', ]
 
 # --[ Configuration files and directory ]--
 default[:mrepo][:config_dir]  = '/etc/mrepo.conf.d'
@@ -19,8 +19,9 @@ default[:mrepo][:srcdir]   = '/var/mrepo'
 default[:mrepo][:wwwdir]   = '/var/www/mrepo'
 default[:mrepo][:lockdir]  = '/var/run/mrepo'
 default[:mrepo][:cachedir] = '/var/cache/mrepo'
-default[:mrepo][:keydir]   = "#{node[:mrepo][:wwwdir]}/keys"
 default[:mrepo][:logfile]  = '/var/log/mrepo.log'
+default[:mrepo][:isodir]   = "#{node[:mrepo][:srcdir]}/iso"
+default[:mrepo][:keydir]   = "#{node[:mrepo][:wwwdir]}/RPM-GPG-KEY"
 
 # --[ Repo to create ]--
 if platform_family?('rhel')

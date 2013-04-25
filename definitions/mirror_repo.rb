@@ -28,6 +28,7 @@ define  :mirror_repo,
         :metadata    => nil,
         :key_url     => nil,
         :iso         => nil,
+        :iso_url     => nil,
         :urls        => nil,
         :hour        => '0',
         :action      => 'create',
@@ -45,6 +46,7 @@ define  :mirror_repo,
   # --[ Get the parameters ]--
   release        = params[:release]
   iso            = params[:iso]
+  iso_url        = params[:iso_url]
   key_url        = params[:key_url]
   urls           = params[:urls]
   mirror_name    = params[:name]
@@ -54,13 +56,14 @@ define  :mirror_repo,
   gentimeout     = params[:gentimeout].to_i
   src_dir        = node[:mrepo][:srcdir]
   key_repo       = node[:mrepo][:keydir]
+  iso_dir        = node[:mrepo][:isodir]
   www_dir        = "#{node[:mrepo][:wwwdir]}/#{mirror_name}"
   mrepo_dir_conf = "#{node[:mrepo][:config_dir]}/#{mirror_name}.conf"
   metadata       = if params[:metadata].is_a? Array; then params[:metadata].join(' '); else params[:metadata]; end
   
   # --[ Random number based on IP ]--
   ip1, ip2, ip3, ip4 = node[:ipaddress].split('.')
-  minute_random      = (ip4.to_i * 256 + ip3.to_i )% 3600
+  minute_random      = (ip4.to_i * 256 + ip3.to_i ) % 60
 
   # --[ Meta could be an array ]--
   if params[:metadata].is_a? Array
@@ -126,6 +129,22 @@ define  :mirror_repo,
         timeout 3600
 
         action :run
+      end
+    end
+
+    unless iso_url.nil?
+      iso_url.each do | iso_dvd |
+        iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
+        execute "Getting iso: #{iso_name}" do
+          path ['/bin','/usr/bin']
+          command "wget #{iso_dvd} -O #{iso_dir}/#{iso_name}"
+          creates "#{iso_dir}/#{iso_name}"
+          user 'root'
+          group 'root'
+          timeout 3600
+
+          action :run
+        end
       end
     end
 

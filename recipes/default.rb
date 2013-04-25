@@ -43,6 +43,7 @@ end
 # --[ Make directory are present ]--
 dir_create = [
     node[:mrepo][:keydir],
+    node[:mrepo][:isodir],
     node[:mrepo][:srcdir],
     node[:mrepo][:wwwdir],
     node[:mrepo][:lockdir],
