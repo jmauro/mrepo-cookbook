@@ -15,23 +15,27 @@ default[:mrepo][:config_dir]  = '/etc/mrepo.conf.d'
 default[:mrepo][:config_file] = '/etc/mrepo.conf'
 
 # --[ Pkgs default directory structure ]--
-default[:mrepo][:srcdir]   = '/var/mrepo'
-default[:mrepo][:wwwdir]   = '/var/www/mrepo'
-default[:mrepo][:lockdir]  = '/var/run/mrepo'
-default[:mrepo][:cachedir] = '/var/cache/mrepo'
+default[:mrepo][:dir] = {
+  [:src]      => '/var/mrepo',
+  [:www]      => '/var/www/mrepo',
+  [:lock]     => '/var/run/mrepo',
+  [:cachedir] => '/var/www/mrepo',
+  [:iso]      => "#{node[:mrepo][:srcdir]}/iso",
+  [:key]      => "#{node[:mrepo][:wwwdir]}/RPM-GPG-KEY"
+}
+
 default[:mrepo][:logfile]  = '/var/log/mrepo.log'
-default[:mrepo][:isodir]   = "#{node[:mrepo][:srcdir]}/iso"
-default[:mrepo][:keydir]   = "#{node[:mrepo][:wwwdir]}/RPM-GPG-KEY"
 
 # --[ Repo to create ]--
-if platform_family?('rhel')
+case node[:platform_family]
+when 'rhel'
   default[:mrepo][:metadata] = 'repomd yum'
-elsif platform_family?('debian')
+when 'debian'
   default[:mrepo][:metadata] = 'repomd apt'
 end
 
 # --[ CPU architecture ]--
-default[:mrepo][:arch] = 'x86_64'
+default[:mrepo][:arch] = node[:machine]
 
 # --[ Report ]--
 default[:mrepo][:mailto]      = 'root@localhost'
