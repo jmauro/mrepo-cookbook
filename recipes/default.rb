@@ -16,7 +16,6 @@ include_recipe 'yum::epel'
 # --[ Install pkg ]--
 node[:mrepo][:packages].each do |pkg|
   package pkg do
-    action :install
   end
 end 
 
@@ -30,6 +29,7 @@ template '/etc/mrepo.conf' do
   )
 end
 
+# --[ Since 'mrepo' deploys one configuration file ]--
 template '/etc/logrotate.d/mrepo' do
   source 'mrepo.logrotate.erb'
   owner 'root'
@@ -40,18 +40,9 @@ template '/etc/logrotate.d/mrepo' do
   )
 end
 
-# --[ Make directory are present ]--
-dir_create = [
-    node[:mrepo][:keydir],
-    node[:mrepo][:isodir],
-    node[:mrepo][:srcdir],
-    node[:mrepo][:wwwdir],
-    node[:mrepo][:lockdir],
-    node[:mrepo][:cachedir],
-    node[:mrepo][:config_dir],
-  ]
-dir_create.each do |dir|
-  directory dir do
+# --[ Make sure directory are present ]--
+node[:mrepo][:dir].each do |name, path|
+  directory path do
     owner 'root'
     group 'root'
     mode  '0755'

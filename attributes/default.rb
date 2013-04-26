@@ -16,12 +16,12 @@ default[:mrepo][:config_file] = '/etc/mrepo.conf'
 
 # --[ Pkgs default directory structure ]--
 default[:mrepo][:dir] = {
-  [:src]      => '/var/mrepo',
-  [:www]      => '/var/www/mrepo',
-  [:lock]     => '/var/run/mrepo',
-  [:cachedir] => '/var/www/mrepo',
-  [:iso]      => "#{node[:mrepo][:srcdir]}/iso",
-  [:key]      => "#{node[:mrepo][:wwwdir]}/RPM-GPG-KEY"
+  :src      => '/var/mrepo',
+  :www      => '/var/www/mrepo',
+  :lock     => '/var/run/mrepo',
+  :cachedir => '/var/www/mrepo',
+  :iso      => "#{node[:mrepo][:srcdir]}/iso",
+  :key      => "#{node[:mrepo][:wwwdir]}/RPM-GPG-KEY"
 }
 
 default[:mrepo][:logfile]  = '/var/log/mrepo.log'
@@ -35,7 +35,11 @@ when 'debian'
 end
 
 # --[ CPU architecture ]--
-default[:mrepo][:arch] = node[:machine]
+if node[:machine]
+  default[:mrepo][:arch] = node[:machine]
+else
+  default[:mrepo][:arch] = 'x86_64'
+end
 
 # --[ Report ]--
 default[:mrepo][:mailto]      = 'root@localhost'
