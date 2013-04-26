@@ -19,18 +19,19 @@ node[:mrepo][:packages].each do |pkg|
   end
 end 
 
-template '/etc/mrepo.conf' do
+template node[:mrepo][:file][:conf] do
   source 'mrepo.conf.erb'
   owner 'root'
   group 'root'
   mode  '0644'
   variables(
-    :mrepo => node[:mrepo],
+    :section => 'main',
+    :mrepo   => node[:mrepo][:conf][:main],
   )
 end
 
 # --[ Since 'mrepo' deploys one configuration file ]--
-template '/etc/logrotate.d/mrepo' do
+template node[:mrepo][:file][:logrotate] do
   source 'mrepo.logrotate.erb'
   owner 'root'
   group 'root'
@@ -40,8 +41,9 @@ template '/etc/logrotate.d/mrepo' do
   )
 end
 
-# --[ Make sure directory are present ]--
-node[:mrepo][:dir].each do |name, path|
+# --[ Make sure directory are present                          ]--
+# --[ NOTE:  "sort" is not needed since "recursive" is present ]--
+node[:mrepo][:dir].sort{ |a, b| a[1] <=> b[1]}.each do |name, path|
   directory path do
     owner 'root'
     group 'root'
