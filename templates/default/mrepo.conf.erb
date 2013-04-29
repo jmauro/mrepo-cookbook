@@ -4,8 +4,8 @@
 # \___|_||_\___|_|    \___\___/_||_\__|_| \___/_|_\___\__,_|
 # ----------------------------------------------------------
 
-### Configuration '<%= @section %>' file for mrepo
+### Section '<%= @section %>' file for mrepo
 [<%= @section %>]
-<% @mrepo.each do | option, value ] -%>
+<% @mrepo.each do | option, value | -%>
 <%= option %> = <%= value %>
 <% end -%>
