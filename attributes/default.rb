@@ -47,22 +47,22 @@ end
 default[:mrepo][:conf][:main]['arch'] = node[:mrepo][:arch]
 
 # The location of the ISO images and RPM files
-default[:mrepo][:conf][:main]['srcdir'] = node[:mrepo][:srcdir]
+default[:mrepo][:conf][:main]['srcdir'] = node[:mrepo][:dir][:srcdir]
 
 ## The location of the generated repositories
-default[:mrepo][:conf][:main]['wwwdir'] = node[:mrepo][:wwwdir]
+default[:mrepo][:conf][:main]['wwwdir'] = node[:mrepo][:dir][:wwwdir]
 
 ## The location of the dist config files
-default[:mrepo][:conf][:main]['confdir'] = node[:mrepo][:config_dir]
+default[:mrepo][:conf][:main]['confdir'] = node[:mrepo][:dir][:configdir]
 
 ## The location of the cachedir (used by yum)
-default[:mrepo][:conf][:main]['cachedir'] = node[:mrepo][:cachedir]
+default[:mrepo][:conf][:main]['cachedir'] = node[:mrepo][:dir][:cachedir]
 
 ## The location of the lockdir
-default[:mrepo][:conf][:main]['lockdir'] = node[:mrepo][:lockdir]
+default[:mrepo][:conf][:main]['lockdir'] = node[:mrepo][:dir][:lockdir]
 
 ## The location of the logfile
-default[:mrepo][:conf][:main]['logfile'] = node[:mrepo][:logfile]
+default[:mrepo][:conf][:main]['logfile'] = node[:mrepo][:file][:log]
 
 ## Sent report to
 default[:mrepo][:conf][:main]['mailto'] = 'root@localhost'
