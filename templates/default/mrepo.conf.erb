@@ -7,5 +7,7 @@
 ### Section '<%= @section %>' file for mrepo
 [<%= @section %>]
 <% @mrepo.each do | option, value | -%>
+<% if ! [ 'action', 'update', 'action', 'key_url', 'iso_url', ].include? option -%>
 <%= option %> = <%= value %>
+<% end -%>
 <% end -%>

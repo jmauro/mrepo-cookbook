@@ -16,10 +16,10 @@ default[:mrepo][:dir] = {
   :srcdir    => '/var/mrepo',
   :wwwdir    => '/var/www/mrepo',
   :lockdir   => '/var/run/mrepo',
+  :cachedir  => '/var/cache/mrepo',
 }
 default[:mrepo][:dir][:iso]      = "#{node[:mrepo][:dir][:srcdir]}/iso"
-default[:mrepo][:dir][:key]      = "#{node[:mrepo][:wwwdir]}/RPM-GPG-KEY"
-default[:mrepo][:dir][:cachedir] = node[:mrepo][:dir][:wwwdir]
+default[:mrepo][:dir][:key]      = "#{node[:mrepo][:dir][:wwwdir]}/RPM-GPG-KEY"
 
 # --[ File declaration ]--
 default[:mrepo][:file][:log]       = '/var/log/mrepo.log'
