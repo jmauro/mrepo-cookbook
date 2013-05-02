@@ -84,9 +84,6 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
     unless repo_tags['key_url'].nil?
       key_url = repo_tags['key_url']
       key_name = /.*\/(.*)$/.match(key_url)[1]
-      Chef::Log.info ">>> [:mirror_repo] #{key_url}"
-      Chef::Log.info ">>> [:mirror_repo] #{key_name}"
-      Chef::Log.info ">>> [:mirror_repo] #{keydir}/#{key_name}"
       execute "Getting key file #{key_name}" do
         path ['/bin','/usr/bin']
         command "wget #{key_url} -O #{keydir}/#{key_name}"
