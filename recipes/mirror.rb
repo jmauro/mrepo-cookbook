@@ -175,7 +175,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         hour '0'
         minute minute_random
         path "/bin:/usr/bin"
-        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && /usr/bin/mrepo -gu \"#{repo_name}\""
+        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && /usr/bin/mrepo -gu \"#{repo_name}\""
         user "root"
         home srcdir
         shell "/bin/bash"
