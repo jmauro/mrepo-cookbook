@@ -5,7 +5,6 @@
 # Author::        Jeremy MAURO (j.mauro@criteo.com)
 #
 #
-#
 
 # --[ Default option ]--
 default[:mrepo][:mirror]['arch']     = node[:mrepo][:arch]
