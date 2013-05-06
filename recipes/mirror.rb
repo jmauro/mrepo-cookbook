@@ -84,9 +84,6 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
     unless repo_tags['key_url'].nil?
       key_url = repo_tags['key_url']
       key_name = /.*\/(.*)$/.match(key_url)[1]
-      Chef::Log.info ">>> [:mirror_repo] #{key_url}"
-      Chef::Log.info ">>> [:mirror_repo] #{key_name}"
-      Chef::Log.info ">>> [:mirror_repo] #{keydir}/#{key_name}"
       execute "Getting key file #{key_name}" do
         path ['/bin','/usr/bin']
         command "wget #{key_url} -O #{keydir}/#{key_name}"
@@ -178,7 +175,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         hour '0'
         minute minute_random
         path "/bin:/usr/bin"
-        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && /usr/bin/mrepo -gu \"#{repo_name}\""
+        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && /usr/bin/mrepo -gu \"#{repo_name}\""
         user "root"
         home srcdir
         shell "/bin/bash"

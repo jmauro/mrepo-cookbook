@@ -7,13 +7,13 @@
 #
 #
 
-## --[ Default option ]--
-#default[:mrepo][:mirror]['arch']     = node[:mrepo][:arch]
-#default[:mrepo][:mirror]['update']   = 'daily'
-#default[:mrepo][:mirror]['action']   = 'create'
-#default[:mrepo][:mirror]['metadata'] = 'repomd'
-#default[:mrepo][:mirror]['timeout']  = '3600'
-#
+# --[ Default option ]--
+default[:mrepo][:mirror]['arch']     = node[:mrepo][:arch]
+default[:mrepo][:mirror]['update']   = 'daily'
+default[:mrepo][:mirror]['action']   = 'create'
+default[:mrepo][:mirror]['metadata'] = 'repomd'
+default[:mrepo][:mirror]['timeout']  = '3600'
+
 ## --[ Repository to mirror definition ]--
 #default[:mrepo][:repo] = {
 #  'epel-CentOS-6' => {
