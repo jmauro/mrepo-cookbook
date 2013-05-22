@@ -76,8 +76,8 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         :mrepo   => repo_tags,
       )
 
-    notifies :run, "execute[Generate mrepo for #{repo_name}]"
-    notifies :write, "log[Adding #{repo_name}]"
+      notifies :run, "execute[Generate mrepo for #{repo_name}]"
+      notifies :write, "log[Adding #{repo_name}]"
     end
 
 
@@ -217,8 +217,6 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       end
     end
   else
-    Chef::Log.info ">>> [:mirror_repo] Removing repo '#{repo_name}'"
-
     # --[ Iso ]--
     log "Unmounting iso #{repo_name}" do
       message ">>> [:mirror_repo] Umounting iso for repo '#{repo_name}'"
