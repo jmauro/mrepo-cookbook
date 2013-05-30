@@ -100,10 +100,28 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       iso_url = repo_tags['iso_url']
       iso_url.each do | iso_dvd |
         iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
+        # --[ Gettin md5sum file if given by user ]--
+        unless repo_tags['iso_md5sum'].nil?
+          execute "Getting md5sum file" do
+            command "curl -s #{repo_tags['iso_md5sum']} -o #{isodir}/#{iso_name}.md5sum"
+            creates "#{isodir}/#{iso_name}.md5sum"
+            user 'root'
+            group 'root'
+          
+            action :run
+          end
+        end
+        
         execute "Getting iso: #{iso_name}" do
           path ['/bin','/usr/bin']
-          command "wget #{iso_dvd} -O #{isodir}/#{iso_name}"
-          creates "#{isodir}/#{iso_name}"
+          command "curl -s #{iso_dvd} -o #{isodir}/#{iso_name}"
+          cwd isodir
+          # --[ Chekcing if md5sum file is present if not test the iso file ]--
+          if ::File.exist?("#{isodir}/#{iso_name}.md5sum")
+            not_if "grep #{iso_name} #{isodir}/#{iso_name}.md5sum | md5sum -c"
+          else
+            creates "#{isodir}/#{iso_name}"
+          end
           user 'root'
           group 'root'
           timeout gentimeout
