@@ -26,11 +26,12 @@ gentimeout = node[:mrepo][:mirror]['timeout'].to_i
 
 # --[ Random number based on IP ]--
 ip1, ip2, ip3, ip4  = node[:ipaddress].split('.')
-minute_random       = (ip4.to_i * 256 + ip3.to_i ) % 60
+minute_ip           = (ip4.to_i * 256 + ip3.to_i ) % 60
 
 node[:mrepo][:repo].each do | repo_name, repo_tags |
-  array_action   = [ repo_tags['action'] ]
-  array_update   = [ repo_tags['update'] ]
+  minute_random = ( minute_ip + repo_name.sum ) % 60
+  array_action  = [ repo_tags['action'] ]
+  array_update  = [ repo_tags['update'] ]
   # --[ Check arguments ]--
   invalid_array = {
     :invalid_action => {
@@ -102,7 +103,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
         # --[ Gettin md5sum file if given by user ]--
         unless repo_tags['iso_md5sum'].nil?
-          execute "Getting md5sum file" do
+          execute "Getting md5sum for #{iso_name}" do
             command "curl -s #{repo_tags['iso_md5sum']} -o #{isodir}/#{iso_name}.md5sum"
             creates "#{isodir}/#{iso_name}.md5sum"
             user 'root'
@@ -114,11 +115,12 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         
         execute "Getting iso: #{iso_name}" do
           path ['/bin','/usr/bin']
-          command "curl -s #{iso_dvd} -o #{isodir}/#{iso_name}"
+          # --[ Make sure iso not mounted when downloading it ]--
+          command "(losetup --show -f #{isodir}/#{iso_name} >/dev/null && umount #{isodir}/#{iso_name} 2>/dev/null >&2 || true) && curl -s #{iso_dvd} -o #{isodir}/#{iso_name}"
           cwd isodir
           # --[ Chekcing if md5sum file is present if not test the iso file ]--
           if ::File.exist?("#{isodir}/#{iso_name}.md5sum")
-            not_if "grep #{iso_name} #{isodir}/#{iso_name}.md5sum | md5sum -c"
+            not_if "cd #{isodir} && grep #{iso_name} #{iso_name}.md5sum | md5sum -c"
           else
             creates "#{isodir}/#{iso_name}"
           end
