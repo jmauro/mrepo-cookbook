@@ -1,38 +1,55 @@
 #
 # Cookbook Name::	mrepo
-# Description::		Recipe to mirror any repository with 'mrepo'
-# Recipe::				mirror.rb
+# Description::		Definition to add remote repository to mrepo
+# Recipe::				mirror_repo.rb
 # Author::        Jeremy MAURO (j.mauro@criteo.com)
 #
 #
-#
 
-include_recipe 'mrepo'
-# --[ Options with possible arguments ]--
-acceptable_action   = [ 'create', 'delete' ]
-acceptable_update   = [ 'now', 'weekly', 'nightly', 'never', 'daily' ]
+# Example of use:
+# mirror_repo 'CentOS-6' do
+#   description 'Repository CentOS 5.6 32 bit'
+#   release   '5.6'
+#   arch      'i386'
+#   metadata  [ 'repomd' , 'yum' ]
+#   action    'create'
+#   update    'nightly'
+#   urls      ({
+#     :addons      => 'rsync://mirrors.kernel.org/centos/$release/addons/$arch/',
+#     :centosplus  => 'rsync://mirrors.kernel.org/centos/$release/centosplus/$arch/',
+#     :updates     => 'rsync://mirrors.kernel.org/centos/$release/updates/$arch/',
+#   })
+# end
 
-# --[ Default settings from 'mrepo' from configuration file ]--
-srcdir  = node[:mrepo][:conf][:main]['srcdir']
-wwwdir  = node[:mrepo][:conf][:main]['wwwdir']
-confdir = node[:mrepo][:conf][:main]['confdir']
+define :mirror_repo,
+         :action   => 'create',
+         :cookbook => 'mrepo',
+         :repo     => nil do
 
-# --[ Default settings from 'mrepo' from default attributs ]--
-keydir  = node[:mrepo][:dir][:key]
-isodir  = node[:mrepo][:dir][:iso]
+  include_recipe 'mrepo'
 
-# --[ Loading default ]--
-gentimeout = node[:mrepo][:mirror]['timeout'].to_i
+  acceptable_action   = [ 'create', 'delete' ]
+  acceptable_update   = [ 'now', 'weekly', 'nightly', 'never', 'daily' ]
 
-# --[ Random number based on IP ]--
-ip1, ip2, ip3, ip4  = node[:ipaddress].split('.')
-minute_ip           = (ip4.to_i * 256 + ip3.to_i ) % 60
 
-node[:mrepo][:repo].each do | repo_name, repo_tags |
-  minute_random = ( minute_ip + repo_name.sum ) % 60
-  array_action  = [ repo_tags['action'] ]
-  array_update  = [ repo_tags['update'] ]
+  # --[ Get the parameters ]--
+  repo_name         = params[:name]
+  repo_tags         = params[:repo].reject{|key, value| key == :name }
+  gentimeout        = node[:mrepo][:mirror]['timeout'].to_i
+  isodir            = node[:mrepo][:dir][:iso]
+  keydir            = node[:mrepo][:dir][:key]
+  srcdir            = node[:mrepo][:conf][:main]['srcdir']
+  wwwdir            = node[:mrepo][:conf][:main]['wwwdir']
+  confdir           = node[:mrepo][:conf][:main]['confdir']
+  mrepo_config_file = "#{confdir}/#{repo_name}.conf"
+  
+  # --[ Random number based on IP ]--
+  ip1, ip2, ip3, ip4 = node[:ipaddress].split('.')
+  minute_random      = (ip4.to_i * 256 + ip3.to_i ) % 60
+
   # --[ Check arguments ]--
+  array_action = [ repo_tags['action'] ]
+  array_update = [ repo_tags['update'] ]
   invalid_array = {
     :invalid_action => {
       :title      => 'action',
@@ -45,6 +62,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       :acceptable => acceptable_update,
     },
   }
+
   # --[ Checks valid argument for manddatory options: 'update', 'action' ]--
   invalid_options = %w(invalid_action invalid_update)
   invalid_options.each do |option|
@@ -58,8 +76,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
     end
   end
 
-  if repo_tags['action'] == 'create'
-    mrepo_config_file = "#{confdir}/#{repo_name}.conf"
+  if params[:action] == 'create'
     # --[ For each 'arch' create a configuration file different ]--
     log "Adding #{repo_name}" do
       message ">>> [:mirror_repo] Adding repo '#{repo_name}'"
@@ -68,6 +85,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       action :nothing
     end
     template mrepo_config_file do
+      cookbook params[:cookbook]
       source 'mrepo.conf.erb'
       owner 'root'
       group 'root'
@@ -81,14 +99,6 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       notifies :write, "log[Adding #{repo_name}]"
     end
 
-    execute 'Checking loop device number' do
-      path [ '/sbin', '/usr/sbin', '/bin','/usr/bin', ]
-      # --[ Create 256 loop devices ]--
-      command 'MAKEDEV -v /dev/loop'
-      not_if 'test -r /dev/loop255'
-
-      action :run
-    end
 
     unless repo_tags['key_url'].nil?
       key_url = repo_tags['key_url']
@@ -109,36 +119,16 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       iso_url = repo_tags['iso_url']
       iso_url.each do | iso_dvd |
         iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
-        # --[ Gettin md5sum file if given by user ]--
-        unless repo_tags['iso_md5sum'].nil?
-          execute "Getting md5sum for #{iso_name}" do
-            command "curl -s #{repo_tags['iso_md5sum']} -o #{isodir}/#{iso_name}.md5sum"
-            creates "#{isodir}/#{iso_name}.md5sum"
-            user 'root'
-            group 'root'
-          
-            action :run
-          end
-        end
-        
         execute "Getting iso: #{iso_name}" do
           path ['/bin','/usr/bin']
-          # --[ Make sure iso not mounted when downloading it ]--
-          command "(losetup --show -f #{isodir}/#{iso_name} >/dev/null && umount #{isodir}/#{iso_name} 2>/dev/null >&2 || true) && curl -s #{iso_dvd} -o #{isodir}/#{iso_name}"
-          cwd isodir
-          # --[ Chekcing if md5sum file is present if not test the iso file ]--
-          if ::File.exist?("#{isodir}/#{iso_name}.md5sum")
-            not_if "cd #{isodir} && grep #{iso_name} #{iso_name}.md5sum | md5sum -c"
-          else
-            creates "#{isodir}/#{iso_name}"
-          end
+          command "wget #{iso_dvd} -O #{isodir}/#{iso_name}"
+          creates "#{isodir}/#{iso_name}"
           user 'root'
           group 'root'
           timeout gentimeout
 
           action :run
         end
-
       end
     end
 
@@ -258,7 +248,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       command "umount #{wwwdir}/#{repo_name}*/disc*"
       user "root"
       group "root"
-      if_only "/bin/mount | /bin/grep #{wwwdir}/#{repo_name} | grep disc"
+      only_if "/bin/mount | /bin/grep #{wwwdir}/#{repo_name} | grep disc"
 
       notifies :write, "log[Unmounting iso #{repo_name}]"
     end
