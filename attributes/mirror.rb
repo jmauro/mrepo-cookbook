@@ -13,6 +13,12 @@ default[:mrepo][:mirror]['action']   = 'create'
 default[:mrepo][:mirror]['metadata'] = 'repomd'
 default[:mrepo][:mirror]['timeout']  = '3600'
 
+# --[ Options set ]--
+default[:mrepo][:mirror][:options_set] = {
+  :action => [ 'create', 'delete' ],
+  :update => [ 'now', 'weekly', 'nightly', 'never', 'daily' ],
+}
+
 ## --[ Repository to mirror definition ]--
 #default[:mrepo][:repo] = {
 #  'epel-CentOS-6' => {

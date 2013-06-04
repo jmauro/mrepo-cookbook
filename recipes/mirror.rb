@@ -8,9 +8,6 @@
 #
 
 include_recipe 'mrepo'
-# --[ Options with possible arguments ]--
-acceptable_action   = [ 'create', 'delete' ]
-acceptable_update   = [ 'now', 'weekly', 'nightly', 'never', 'daily' ]
 
 # --[ Default settings from 'mrepo' from configuration file ]--
 srcdir  = node[:mrepo][:conf][:main]['srcdir']
@@ -28,6 +25,15 @@ gentimeout = node[:mrepo][:mirror]['timeout'].to_i
 ip1, ip2, ip3, ip4  = node[:ipaddress].split('.')
 minute_ip           = (ip4.to_i * 256 + ip3.to_i ) % 60
 
+execute 'Checking loop device number' do
+  path [ '/sbin', '/usr/sbin', '/bin','/usr/bin', ]
+  # --[ Create 256 loop devices ]--
+  command 'MAKEDEV -v /dev/loop'
+  not_if 'test -r /dev/loop255'
+
+  action :run
+end
+
 node[:mrepo][:repo].each do | repo_name, repo_tags |
   minute_random = ( minute_ip + repo_name.sum ) % 60
   array_action  = [ repo_tags['action'] ]
@@ -36,12 +42,12 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
   invalid_array = {
     :invalid_action => {
       :title      => 'action',
-      :value      => array_action - acceptable_action,
+      :value      => array_action - node[:mrepo][:mirror][:options_set][:action],
       :acceptable => acceptable_action,
     },
     :invalid_update => {
       :title      => 'update',
-      :value      => array_update - acceptable_update,
+      :value      => array_update - node[:mrepo][:mirror][:options_set][:update],
       :acceptable => acceptable_update,
     },
   }
@@ -81,15 +87,6 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       notifies :write, "log[Adding #{repo_name}]"
     end
 
-    execute 'Checking loop device number' do
-      path [ '/sbin', '/usr/sbin', '/bin','/usr/bin', ]
-      # --[ Create 256 loop devices ]--
-      command 'MAKEDEV -v /dev/loop'
-      not_if 'test -r /dev/loop255'
-
-      action :run
-    end
-
     unless repo_tags['key_url'].nil?
       key_url = repo_tags['key_url']
       key_name = /.*\/(.*)$/.match(key_url)[1]
@@ -102,7 +99,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         timeout gentimeout
 
         action :run
-      end
+      end unless ::File.exists?("#{keydir}/#{key_name}")
     end
 
     unless repo_tags['iso_url'].nil?
