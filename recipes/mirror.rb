@@ -43,12 +43,12 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
     :invalid_action => {
       :title      => 'action',
       :value      => array_action - node[:mrepo][:mirror][:options_set][:action],
-      :acceptable => acceptable_action,
+      :acceptable => node[:mrepo][:mirror][:options_set][:action],
     },
     :invalid_update => {
       :title      => 'update',
       :value      => array_update - node[:mrepo][:mirror][:options_set][:update],
-      :acceptable => acceptable_update,
+      :acceptable => node[:mrepo][:mirror][:options_set][:update],
     },
   }
   # --[ Checks valid argument for manddatory options: 'update', 'action' ]--
