@@ -8,7 +8,7 @@
 #
 
 # --[ Packages definition ]--
-default[:mrepo][:packages] = [ 'mrepo', 'rsync', 'lftp', 'createrepo', 'hardlink', 'repoview', 'yum-arch', 'fuse', 'curl', ]
+default[:mrepo][:packages] = [ 'mrepo', 'rsync', 'lftp', 'createrepo', 'hardlink', 'repoview', 'yum-arch', 'fuse', 'curl', 'wget', ]
 
 # --[ Pkgs default directory structure ]--
 default[:mrepo][:dir] = {

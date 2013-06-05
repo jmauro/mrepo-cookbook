@@ -21,10 +21,6 @@ isodir  = node[:mrepo][:dir][:iso]
 # --[ Loading default ]--
 gentimeout = node[:mrepo][:mirror]['timeout'].to_i
 
-# --[ Random number based on IP ]--
-ip1, ip2, ip3, ip4  = node[:ipaddress].split('.')
-minute_ip           = (ip4.to_i * 256 + ip3.to_i ) % 60
-
 execute 'Checking loop device number' do
   path [ '/sbin', '/usr/sbin', '/bin','/usr/bin', ]
   # --[ Create 256 loop devices ]--
@@ -35,7 +31,7 @@ execute 'Checking loop device number' do
 end
 
 node[:mrepo][:repo].each do | repo_name, repo_tags |
-  minute_random = ( minute_ip + repo_name.sum ) % 60
+  minute_random = ( node[:mrepo][:mirror][:minute_ip] + repo_name.sum ) % 60
   array_action  = [ repo_tags['action'] ]
   array_update  = [ repo_tags['update'] ]
   # --[ Check arguments ]--
