@@ -89,13 +89,13 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       execute "Getting key file #{key_name}" do
         path ['/bin','/usr/bin']
         command "wget \"#{key_url}\" -O \"#{keydir}/#{key_name}\""
-        creates "#{keydir}/#{key_name}"
         user 'root'
         group 'root'
         timeout gentimeout
+        not_if "test -s \"#{keydir}/#{key_name}\""
 
         action :run
-      end unless ::File.exists?("#{keydir}/#{key_name}")
+      end
     end
 
     unless repo_tags['iso_url'].nil?
