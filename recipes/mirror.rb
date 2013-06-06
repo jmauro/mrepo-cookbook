@@ -88,7 +88,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       key_name = /.*\/(.*)$/.match(key_url)[1]
       execute "Getting key file #{key_name}" do
         path ['/bin','/usr/bin']
-        command "wget #{key_url} -O #{keydir}/#{key_name}"
+        command "wget \"#{key_url}\" -O \"#{keydir}/#{key_name}\""
         creates "#{keydir}/#{key_name}"
         user 'root'
         group 'root'
@@ -141,6 +141,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
 
       action :nothing
     end
+
     execute "Generate mrepo for #{repo_name}" do
       path ['/usr/bin','/bin']
       command "mrepo -g \"#{repo_name}\""
