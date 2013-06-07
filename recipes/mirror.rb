@@ -31,9 +31,10 @@ execute 'Checking loop device number' do
 end
 
 node[:mrepo][:repo].each do | repo_name, repo_tags |
-  minute_random = ( node[:mrepo][:mirror][:minute_ip] + repo_name.sum ) % 60
-  array_action  = [ repo_tags['action'] ]
-  array_update  = [ repo_tags['update'] ]
+  minute_random     = ( node[:mrepo][:mirror][:minute_ip] + repo_name.sum ) % 60
+  array_action      = [ repo_tags['action'] ]
+  array_update      = [ repo_tags['update'] ]
+  mrepo_config_file = "#{confdir}/#{repo_name}.conf"
   # --[ Check arguments ]--
   invalid_array = {
     :invalid_action => {
@@ -47,6 +48,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       :acceptable => node[:mrepo][:mirror][:options_set][:update],
     },
   }
+
   # --[ Checks valid argument for manddatory options: 'update', 'action' ]--
   invalid_options = %w(invalid_action invalid_update)
   invalid_options.each do |option|
@@ -61,7 +63,6 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
   end
 
   if repo_tags['action'] == 'create'
-    mrepo_config_file = "#{confdir}/#{repo_name}.conf"
     # --[ For each 'arch' create a configuration file different ]--
     log "Adding #{repo_name}" do
       message ">>> [:mirror_repo] Adding repo '#{repo_name}'"
@@ -131,7 +132,6 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
 
           action :run
         end
-
       end
     end
 
@@ -144,7 +144,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
 
     execute "Generate mrepo for #{repo_name}" do
       path ['/usr/bin','/bin']
-      command "mrepo -g \"#{repo_name}\""
+      command "mrepo -gf \"#{repo_name}\""
       cwd srcdir
       user 'root'
       group 'root'
@@ -164,7 +164,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       end
       execute "Synchronize repo #{repo_name}" do
         path ['/usr/bin','/bin']
-        command "/usr/bin/mrepo -gu \"#{repo_name}\""
+        command "/usr/bin/mrepo -gfu \"#{repo_name}\""
         cwd srcdir
         user "root"
         group "root"
@@ -198,7 +198,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         hour '0'
         minute minute_random
         path "/bin:/usr/bin"
-        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && /usr/bin/mrepo -gu \"#{repo_name}\""
+        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && /usr/bin/mrepo -gfu \"#{repo_name}\" > /dev/null 2>&1"
         user "root"
         home srcdir
         shell "/bin/bash"
@@ -225,7 +225,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         hour '0'
         minute minute_random
         path "/bin:/usr/bin"
-        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && /usr/bin/mrepo -gu \"#{repo_name}\""
+        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && /usr/bin/mrepo -gfu \"#{repo_name}\" > /dev/null 2>&1"
         user "root"
         home srcdir
         shell "/bin/bash"
@@ -252,7 +252,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       command "umount #{wwwdir}/#{repo_name}*/disc*"
       user "root"
       group "root"
-      if_only "/bin/mount | /bin/grep #{wwwdir}/#{repo_name} | grep disc"
+      only_if "/bin/mount | /bin/grep #{wwwdir}/#{repo_name} | grep disc"
 
       notifies :write, "log[Unmounting iso #{repo_name}]"
     end
@@ -281,6 +281,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
 
       action :nothing
     end
+
     file mrepo_config_file do
 
       action :delete

@@ -31,6 +31,14 @@ define :mirror_repo,
   acceptable_action   = [ 'create', 'delete' ]
   acceptable_update   = [ 'now', 'weekly', 'nightly', 'never', 'daily' ]
 
+  execute 'Checking loop device number' do
+    path [ '/sbin', '/usr/sbin', '/bin','/usr/bin', ]
+    # --[ Create 256 loop devices ]--
+    command 'MAKEDEV -v /dev/loop'
+    not_if 'test -r /dev/loop255'
+
+    action :run
+  end
 
   # --[ Get the parameters ]--
   repo_name         = params[:name]
@@ -48,18 +56,20 @@ define :mirror_repo,
   minute_random      = (ip4.to_i * 256 + ip3.to_i ) % 60
 
   # --[ Check arguments ]--
-  array_action = [ repo_tags['action'] ]
-  array_update = [ repo_tags['update'] ]
+  minute_random = ( node[:mrepo][:mirror][:minute_ip] + repo_name.sum ) % 60
+  array_action  = [ repo_tags['action'] ]
+  array_update  = [ repo_tags['update'] ]
+  # --[ Check arguments ]--
   invalid_array = {
     :invalid_action => {
       :title      => 'action',
-      :value      => array_action - acceptable_action,
-      :acceptable => acceptable_action,
+      :value      => array_action - node[:mrepo][:mirror][:options_set][:action],
+      :acceptable => node[:mrepo][:mirror][:options_set][:action],
     },
     :invalid_update => {
       :title      => 'update',
-      :value      => array_update - acceptable_update,
-      :acceptable => acceptable_update,
+      :value      => array_update - node[:mrepo][:mirror][:options_set][:update],
+      :acceptable => node[:mrepo][:mirror][:options_set][:update],
     },
   }
 
@@ -85,7 +95,6 @@ define :mirror_repo,
       action :nothing
     end
     template mrepo_config_file do
-      cookbook params[:cookbook]
       source 'mrepo.conf.erb'
       owner 'root'
       group 'root'
@@ -99,17 +108,16 @@ define :mirror_repo,
       notifies :write, "log[Adding #{repo_name}]"
     end
 
-
     unless repo_tags['key_url'].nil?
       key_url = repo_tags['key_url']
       key_name = /.*\/(.*)$/.match(key_url)[1]
       execute "Getting key file #{key_name}" do
         path ['/bin','/usr/bin']
-        command "wget #{key_url} -O #{keydir}/#{key_name}"
-        creates "#{keydir}/#{key_name}"
+        command "wget \"#{key_url}\" -O \"#{keydir}/#{key_name}\""
         user 'root'
         group 'root'
         timeout gentimeout
+        not_if "test -s \"#{keydir}/#{key_name}\""
 
         action :run
       end
@@ -119,10 +127,29 @@ define :mirror_repo,
       iso_url = repo_tags['iso_url']
       iso_url.each do | iso_dvd |
         iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
+        # --[ Gettin md5sum file if given by user ]--
+        unless repo_tags['iso_md5sum'].nil?
+          execute "Getting md5sum for #{iso_name}" do
+            command "curl -s #{repo_tags['iso_md5sum']} -o #{isodir}/#{iso_name}.md5sum"
+            creates "#{isodir}/#{iso_name}.md5sum"
+            user 'root'
+            group 'root'
+
+            action :run
+          end
+        end
+
         execute "Getting iso: #{iso_name}" do
           path ['/bin','/usr/bin']
-          command "wget #{iso_dvd} -O #{isodir}/#{iso_name}"
-          creates "#{isodir}/#{iso_name}"
+          # --[ Make sure iso not mounted when downloading it ]--
+          command "(losetup --show -f #{isodir}/#{iso_name} >/dev/null && umount #{isodir}/#{iso_name} 2>/dev/null >&2 || true) && curl -s #{iso_dvd} -o #{isodir}/#{iso_name}"
+          cwd isodir
+          # --[ Chekcing if md5sum file is present if not test the iso file ]--
+          if ::File.exist?("#{isodir}/#{iso_name}.md5sum")
+            not_if "cd #{isodir} && grep #{iso_name} #{iso_name}.md5sum | md5sum -c"
+          else
+            creates "#{isodir}/#{iso_name}"
+          end
           user 'root'
           group 'root'
           timeout gentimeout
@@ -138,9 +165,10 @@ define :mirror_repo,
 
       action :nothing
     end
+
     execute "Generate mrepo for #{repo_name}" do
       path ['/usr/bin','/bin']
-      command "mrepo -g \"#{repo_name}\""
+      command "mrepo -gf \"#{repo_name}\""
       cwd srcdir
       user 'root'
       group 'root'
@@ -160,7 +188,7 @@ define :mirror_repo,
       end
       execute "Synchronize repo #{repo_name}" do
         path ['/usr/bin','/bin']
-        command "/usr/bin/mrepo -gu \"#{repo_name}\""
+        command "/usr/bin/mrepo -gfu \"#{repo_name}\""
         cwd srcdir
         user "root"
         group "root"
@@ -194,7 +222,7 @@ define :mirror_repo,
         hour '0'
         minute minute_random
         path "/bin:/usr/bin"
-        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && /usr/bin/mrepo -gu \"#{repo_name}\""
+        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && /usr/bin/mrepo -gfu \"#{repo_name}\" > /dev/null 2>&1"
         user "root"
         home srcdir
         shell "/bin/bash"
@@ -221,7 +249,7 @@ define :mirror_repo,
         hour '0'
         minute minute_random
         path "/bin:/usr/bin"
-        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && /usr/bin/mrepo -gu \"#{repo_name}\""
+        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && /usr/bin/mrepo -gfu \"#{repo_name}\" > /dev/null 2>&1"
         user "root"
         home srcdir
         shell "/bin/bash"
