@@ -51,12 +51,8 @@ define :mirror_repo,
   confdir           = node[:mrepo][:conf][:main]['confdir']
   mrepo_config_file = "#{confdir}/#{repo_name}.conf"
   
-  # --[ Random number based on IP ]--
-  ip1, ip2, ip3, ip4 = node[:ipaddress].split('.')
-  minute_random      = (ip4.to_i * 256 + ip3.to_i ) % 60
-
   # --[ Check arguments ]--
-  minute_random = ( node[:mrepo][:mirror][:minute_ip] + repo_name.sum ) % 60
+  minute_random = ( node[:mrepo][:mirror]['minute_ip'] + repo_name.sum ) % 60
   array_action  = [ repo_tags['action'] ]
   array_update  = [ repo_tags['update'] ]
   # --[ Check arguments ]--

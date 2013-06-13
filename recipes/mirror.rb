@@ -31,7 +31,7 @@ execute 'Checking loop device number' do
 end
 
 node[:mrepo][:repo].each do | repo_name, repo_tags |
-  minute_random     = ( node[:mrepo][:mirror][:minute_ip] + repo_name.sum ) % 60
+  minute_random     = ( node[:mrepo][:mirror]['minute_ip'] + repo_name.sum ) % 60
   array_action      = [ repo_tags['action'] ]
   array_update      = [ repo_tags['update'] ]
   mrepo_config_file = "#{confdir}/#{repo_name}.conf"

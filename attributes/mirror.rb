@@ -13,7 +13,7 @@ default[:mrepo][:mirror]['update']   = 'daily'
 default[:mrepo][:mirror]['action']   = 'create'
 default[:mrepo][:mirror]['metadata'] = 'repomd'
 default[:mrepo][:mirror]['timeout']  = '3600'
-default[:mrepo][:mirror][:minute_ip] = (ip4.to_i * 256 + ip3.to_i ) % 60
+default[:mrepo][:mirror]['minute_ip'] = (ip4.to_i * 256 + ip3.to_i ) % 60
 
 # --[ Options set ]--
 default[:mrepo][:mirror][:options_set] = {
@@ -37,3 +37,5 @@ default[:mrepo][:mirror][:options_set] = {
 #    'epel'     => 'rsync://mirror.i3d.net/fedora-epel/6/$arch',
 #  },
 #}
+
+default[:mrepo][:repo] = Hash.new
