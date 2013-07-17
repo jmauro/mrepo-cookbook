@@ -301,6 +301,7 @@ define :mirror_repo,
 
       action :nothing
     end
+
     file mrepo_config_file do
 
       action :delete

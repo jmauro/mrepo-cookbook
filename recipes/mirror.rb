@@ -110,11 +110,11 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
             creates "#{isodir}/#{iso_name}.md5sum"
             user 'root'
             group 'root'
-          
+
             action :run
           end
         end
-        
+
         execute "Getting iso: #{iso_name}" do
           path ['/bin','/usr/bin']
           # --[ Make sure iso not mounted when downloading it ]--
