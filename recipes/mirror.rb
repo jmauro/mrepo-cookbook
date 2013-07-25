@@ -50,15 +50,18 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
   }
 
   # --[ Checks valid argument for manddatory options: 'update', 'action' ]--
-  invalid_options = %w(invalid_action invalid_update)
-  invalid_options.each do |option|
-    if invalid_array[:"#{option}"][:value].size == 1
-      title      = invalid_array[:"#{option}"][:title]
-      value      = invalid_array[:"#{option}"][:value]
-      acceptable = invalid_array[:"#{option}"][:acceptable]
-      Chef::Log.info ">>> [:mirror_repo] The passed value #{value} for the option [#{title}] is not an acceptable value for \"#{repo_name}\""
-      Chef::Log.info ">>> [:mirror_repo] --> Valide argument are: #{acceptable}"
-      fail('>>> [:mirror_repo] ERROR: exiting chef run')
+  # Note: If delete no arguments needed
+  if repo_tags['action'] != 'delete'
+    invalid_options = %w(invalid_action invalid_update)
+    invalid_options.each do |option|
+      if invalid_array[:"#{option}"][:value].size == 1
+        title      = invalid_array[:"#{option}"][:title]
+        value      = invalid_array[:"#{option}"][:value]
+        acceptable = invalid_array[:"#{option}"][:acceptable]
+        Chef::Log.info ">>> [:mirror_repo] The passed value #{value} for the option [#{title}] is not an acceptable value for \"#{repo_name}\""
+        Chef::Log.info ">>> [:mirror_repo] --> Valide argument are: #{acceptable}"
+        fail('>>> [:mirror_repo] ERROR: exiting chef run')
+      end
     end
   end
 
@@ -266,7 +269,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
     end
     dir_to_remove = %W("#{wwwdir}/#{repo_name}" "#{srcdir}/#{repo_name}")
     dir_to_remove.each do |dir|
-      directory "#{dir}*" do
+      directory "#{dir}" do
         recursive true
 
         action :delete
