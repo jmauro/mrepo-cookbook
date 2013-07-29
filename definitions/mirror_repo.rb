@@ -7,18 +7,19 @@
 #
 
 # Example of use:
-# mirror_repo 'CentOS-6' do
-#   description 'Repository CentOS 5.6 32 bit'
-#   release   '5.6'
-#   arch      'i386'
-#   metadata  [ 'repomd' , 'yum' ]
-#   action    'create'
-#   update    'nightly'
-#   urls      ({
-#     :addons      => 'rsync://mirrors.kernel.org/centos/$release/addons/$arch/',
-#     :centosplus  => 'rsync://mirrors.kernel.org/centos/$release/centosplus/$arch/',
-#     :updates     => 'rsync://mirrors.kernel.org/centos/$release/updates/$arch/',
+# mirror_repo 'CentOS-6-x86_64' do
+#   repo  ({
+#     description 'Repository CentOS 5.6 32 bit'
+#     release   '5.6'
+#     arch      'i386'
+#     metadata  [ 'repomd' , 'yum' ]
+#     action    'create'
+#     update    'nightly'
+#     addons      => 'rsync://mirrors.kernel.org/centos/$release/addons/$arch/',
+#     centosplus  => 'rsync://mirrors.kernel.org/centos/$release/centosplus/$arch/',
+#     updates     => 'rsync://mirrors.kernel.org/centos/$release/updates/$arch/',
 #   })
+#   cookbook 'mrepo'
 # end
 
 define :mirror_repo,
@@ -42,7 +43,7 @@ define :mirror_repo,
 
   # --[ Get the parameters ]--
   repo_name         = params[:name]
-  repo_tags         = params[:repo].reject{|key, value| key == :name }
+  repo_tags         = params[:repo]
   gentimeout        = node[:mrepo][:mirror]['timeout'].to_i
   isodir            = node[:mrepo][:dir][:iso]
   keydir            = node[:mrepo][:dir][:key]
@@ -85,7 +86,7 @@ define :mirror_repo,
     end
   end
 
-  if params[:action] == 'create'
+  if repo_tags['action'] == 'create'
     # --[ For each 'arch' create a configuration file different ]--
     log "Adding #{repo_name}" do
       message ">>> [:mirror_repo] Adding repo '#{repo_name}'"
@@ -98,6 +99,9 @@ define :mirror_repo,
       owner 'root'
       group 'root'
       mode  '0644'
+      if params[:cookbook]
+        cookbook params[:cookbook]
+      end
       variables(
         :section => repo_name,
         :mrepo   => repo_tags,
