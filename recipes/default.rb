@@ -53,3 +53,13 @@ node[:mrepo][:dir].sort{ |a, b| a[1] <=> b[1]}.each do |name, path|
     action :create
   end
 end
+
+# --[ Make sure loopdevice exist ]--
+execute 'Checking loop device number' do
+  path [ '/sbin', '/usr/sbin', '/bin','/usr/bin', ]
+  # --[ Create 256 loop devices ]--
+  command 'MAKEDEV -v /dev/loop'
+  not_if 'test -r /dev/loop255'
+
+  action :run
+end

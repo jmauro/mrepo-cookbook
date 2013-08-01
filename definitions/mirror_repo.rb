@@ -32,15 +32,6 @@ define :mirror_repo,
   acceptable_action   = [ 'create', 'delete' ]
   acceptable_update   = [ 'now', 'weekly', 'nightly', 'never', 'daily' ]
 
-  execute 'Checking loop device number' do
-    path [ '/sbin', '/usr/sbin', '/bin','/usr/bin', ]
-    # --[ Create 256 loop devices ]--
-    command 'MAKEDEV -v /dev/loop'
-    not_if 'test -r /dev/loop255'
-
-    action :run
-  end
-
   # --[ Get the parameters ]--
   repo_name         = params[:name]
   repo_tags         = params[:repo]
