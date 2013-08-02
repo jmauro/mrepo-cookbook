@@ -105,6 +105,7 @@ define :mirror_repo,
     unless repo_tags['key_url'].nil?
       key_url = repo_tags['key_url']
       key_name = /.*\/(.*)$/.match(key_url)[1]
+      key_name = repo_tags['key_name'] if repo_tags['key_name']
       execute "Getting key file #{key_name}" do
         path ['/bin','/usr/bin']
         command "wget \"#{key_url}\" -O \"#{keydir}/#{key_name}\""
