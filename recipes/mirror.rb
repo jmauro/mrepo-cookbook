@@ -69,6 +69,9 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       owner 'root'
       group 'root'
       mode  '0644'
+      if params[:cookbook]
+        cookbook params[:cookbook]
+      end
       variables(
         :section => repo_name,
         :mrepo   => repo_tags,
@@ -139,7 +142,12 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
 
     execute "Generate mrepo for #{repo_name}" do
       path ['/usr/bin','/bin']
-      command "mrepo -gf \"#{repo_name}\""
+      if repo_tags['update'] =~ /(?i-mx:now|once)/
+        # --[ Update repo at least once ]--
+        command "mrepo -gfu \"#{repo_name}\""
+      else
+        command "mrepo -gf \"#{repo_name}\""
+      end
       cwd srcdir
       user 'root'
       group 'root'
@@ -149,26 +157,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       notifies :write, "log[Generating #{repo_name}]"
     end
 
-    if repo_tags['update'] =~ /(?i-mx:now)/
-      # --[ Update repo is now ]--
-      log "Synchronizing #{repo_name}" do
-        message ">>> [:mirror_repo] Synchronizing now repo '#{repo_name}'"
-        level :info
-
-        action :nothing
-      end
-      execute "Synchronize repo #{repo_name}" do
-        path ['/usr/bin','/bin']
-        command "/usr/bin/mrepo -gfu \"#{repo_name}\""
-        cwd srcdir
-        user "root"
-        group "root"
-        timeout gentimeout
-
-        action :run
-        notifies :write, "log[Synchronizing #{repo_name}]"
-      end
-
+    if repo_tags['update'] =~ /(?i-mx:once)/
       # --[ Removing Crons ]--
       cron "Nightly synchronize repo #{repo_name}" do
 
@@ -180,7 +169,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         action :delete
       end
 
-    elsif repo_tags['update'] =~ /(?i-mx:nightly|daily)/
+    elsif repo_tags['update'] =~ /(?i-mx:nightly|daily|now)/
       # --[ Update repo is done every night ]--
       log "Setting nightly cron #{repo_name}" do
         message ">>> [:mirror_repo] Setting nightly cron for '#{repo_name}'"
