@@ -29,9 +29,6 @@ define :mirror_repo,
 
   include_recipe 'mrepo'
 
-  acceptable_action   = [ 'create', 'delete' ]
-  acceptable_update   = [ 'now', 'weekly', 'nightly', 'never', 'daily' ]
-
   # --[ Get the parameters ]--
   repo_name         = params[:name]
   repo_tags         = params[:repo]

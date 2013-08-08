@@ -18,7 +18,7 @@ default[:mrepo][:mirror]['minute_ip'] = (ip4.to_i * 256 + ip3.to_i ) % 60
 # --[ Options set ]--
 default[:mrepo][:mirror][:options_set] = {
   :action => [ 'create', 'delete' ],
-  :update => [ 'now', 'weekly', 'nightly', 'never', 'daily' ],
+  :update => [ 'now', 'weekly', 'nightly', 'never', 'daily', 'once',  ],
 }
 
 
