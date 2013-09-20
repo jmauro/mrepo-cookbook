@@ -266,7 +266,7 @@ define :mirror_repo,
 
       action :nothing
     end
-    dir_to_remove = %W("#{wwwdir}/#{repo_name}" "#{srcdir}/#{repo_name}")
+    dir_to_remove = %W(#{wwwdir}/#{repo_name} #{srcdir}/#{repo_name})
     dir_to_remove.each do |dir|
       directory "#{dir}" do
         recursive true
