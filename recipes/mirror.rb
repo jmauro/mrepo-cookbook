@@ -7,6 +7,8 @@
 #
 #
 
+mrepo_binary = '/usr/bin/mrepo'
+mrepo_binary = "/usr/bin/mrepo -c #{node[:mrepo][:file][:conf]}" if node[:mrepo][:file][:conf] != '/etc/mrepo.conf'
 include_recipe 'mrepo'
 
 # --[ Default settings from 'mrepo' from configuration file ]--
@@ -144,9 +146,9 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       path ['/usr/bin','/bin']
       if repo_tags['update'] =~ /(?i-mx:now|once)/
         # --[ Update repo at least once ]--
-        command "mrepo -gfu \"#{repo_name}\""
+        command "#{mrepo_binary} -gfu \"#{repo_name}\""
       else
-        command "mrepo -gf \"#{repo_name}\""
+        command "#{mrepo_binary} -gf \"#{repo_name}\""
       end
       cwd srcdir
       user 'root'
@@ -182,7 +184,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         hour '0'
         minute minute_random
         path "/bin:/usr/bin"
-        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && /usr/bin/mrepo -gfu \"#{repo_name}\" > /dev/null 2>&1"
+        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && #{mrepo_binary} -gfu \"#{repo_name}\" > /dev/null 2>&1"
         user "root"
         home srcdir
         shell "/bin/bash"
@@ -209,7 +211,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         hour '0'
         minute minute_random
         path "/bin:/usr/bin"
-        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && /usr/bin/mrepo -gfu \"#{repo_name}\" > /dev/null 2>&1"
+        command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && #{mrepo_binary} -gfu \"#{repo_name}\" > /dev/null 2>&1"
         user "root"
         home srcdir
         shell "/bin/bash"
@@ -248,7 +250,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
 
       action :nothing
     end
-    dir_to_remove = %W("#{wwwdir}/#{repo_name}" "#{srcdir}/#{repo_name}")
+    dir_to_remove = %W(#{wwwdir}/#{repo_name} #{srcdir}/#{repo_name})
     dir_to_remove.each do |dir|
       directory "#{dir}" do
         recursive true
