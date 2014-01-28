@@ -118,7 +118,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         execute "Getting iso: #{iso_name}" do
           path ['/bin','/usr/bin']
           # --[ Make sure iso not mounted when downloading it ]--
-          command "(losetup --show -f #{isodir}/#{iso_name} >/dev/null && umount #{isodir}/#{iso_name} 2>/dev/null >&2 || true) && curl -s #{iso_dvd} -o #{isodir}/#{iso_name}"
+          command "(losetup --show -f #{isodir}/#{iso_name} >/dev/null 2>&1 && umount #{isodir}/#{iso_name} 2>/dev/null >&2 ) || true && curl -s #{iso_dvd} -o #{isodir}/#{iso_name}"
           cwd isodir
           # --[ Chekcing if md5sum file is present if not test the iso file ]--
           if ::File.exist?("#{isodir}/#{iso_name}.md5sum")
