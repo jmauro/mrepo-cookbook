@@ -119,17 +119,21 @@ define :mirror_repo,
 
     unless repo_tags['iso_url'].nil?
       iso_url = repo_tags['iso_url']
+
       iso_url.each do | iso_dvd |
         iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
         # --[ Gettin md5sum file if given by user ]--
         unless repo_tags['iso_md5sum'].nil?
           execute "Getting md5sum for #{iso_name}" do
             command "curl -s #{repo_tags['iso_md5sum']} -o #{isodir}/#{iso_name}.md5sum"
-            creates "#{isodir}/#{iso_name}.md5sum"
             user 'root'
             group 'root'
 
             action :run
+            # --[ Making sure the md5 file is a well formatted ]--
+            if ::File.exists?("#{isodir}/#{iso_name}.md5sum")
+              only_if "cd #{isodir} && md5sum -c -w #{iso_name}.md5sum 2>&1 | grep improperly"
+            end
           end
         end
 
