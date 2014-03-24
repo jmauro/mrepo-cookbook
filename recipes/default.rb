@@ -11,13 +11,13 @@
 #
 
 # --[ First of all: make sure epel is delcared]--
-include_recipe 'yum::epel'
+include_recipe 'yum-epel'
 
 # --[ Install pkg ]--
 node[:mrepo][:packages].each do |pkg|
   package pkg do
   end
-end 
+end
 
 template node[:mrepo][:file][:conf] do
   source 'mrepo.conf.erb'
@@ -43,7 +43,7 @@ end
 
 # --[ Make sure directory are present                          ]--
 # --[ NOTE:  "sort" is not needed since "recursive" is present ]--
-node[:mrepo][:dir].sort{ |a, b| a[1] <=> b[1]}.each do |name, path|
+node[:mrepo][:dir].sort { |a, b| a[1] <=> b[1] }.each do |name, path|
   directory path do
     owner 'root'
     group 'root'
@@ -56,7 +56,7 @@ end
 
 # --[ Make sure loopdevice exist ]--
 execute 'Checking loop device number' do
-  path [ '/sbin', '/usr/sbin', '/bin','/usr/bin', ]
+  path ['/sbin', '/usr/sbin', '/bin', '/usr/bin']
   # --[ Create 256 loop devices ]--
   command 'MAKEDEV -v /dev/loop'
   not_if 'test -r /dev/loop255'

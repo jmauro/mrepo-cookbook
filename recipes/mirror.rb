@@ -24,9 +24,9 @@ isodir  = node[:mrepo][:dir][:iso]
 gentimeout = node[:mrepo][:mirror]['timeout'].to_i
 
 node[:mrepo][:repo].each do | repo_name, repo_tags |
-  minute_random     = ( node[:mrepo][:mirror]['minute_ip'] + repo_name.sum ) % 60
-  array_action      = [ repo_tags['action'] ]
-  array_update      = [ repo_tags['update'] ]
+  minute_random     = (node[:mrepo][:mirror]['minute_ip'] + repo_name.sum) % 60
+  array_action      = [repo_tags['action']]
+  array_update      = [repo_tags['update']]
   mrepo_config_file = "#{confdir}/#{repo_name}.conf"
   # --[ Check arguments ]--
   invalid_array = {
@@ -87,15 +87,11 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       key_url = repo_tags['key_url']
       key_name = /.*\/(.*)$/.match(key_url)[1]
       key_name = repo_tags['key_name'] if repo_tags['key_name']
-      execute "Getting key file #{key_name}" do
-        path ['/bin','/usr/bin']
-        command "wget \"#{key_url}\" -O \"#{keydir}/#{key_name}\""
-        user 'root'
+      remote_file "#{keydir}/#{key_name}" do
+        owner 'root'
         group 'root'
-        timeout gentimeout
-        not_if "test -s \"#{keydir}/#{key_name}\""
-
-        action :run
+        mode '0644'
+        source key_url
       end
     end
 
@@ -104,19 +100,16 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
       iso_url.each do | iso_dvd |
         iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
         # --[ Gettin md5sum file if given by user ]--
-        unless repo_tags['iso_md5sum'].nil?
-          execute "Getting md5sum for #{iso_name}" do
-            command "curl -s #{repo_tags['iso_md5sum']} -o #{isodir}/#{iso_name}.md5sum"
-            creates "#{isodir}/#{iso_name}.md5sum"
-            user 'root'
-            group 'root'
-
-            action :run
-          end
+        remote_file "#{isodir}/#{iso_name}.md5sum" do
+          owner 'root'
+          group 'root'
+          mode '0644'
+          source repo_tags['iso_md5sum']
+          not_if { repo_tags['iso_md5sum'].nil? }
         end
 
         execute "Getting iso: #{iso_name}" do
-          path ['/bin','/usr/bin']
+          path ['/bin', '/usr/bin']
           # --[ Make sure iso not mounted when downloading it ]--
           command "(losetup --show -f #{isodir}/#{iso_name} >/dev/null 2>&1 && umount #{isodir}/#{iso_name} 2>/dev/null >&2 || true ) && curl -s -S #{iso_dvd} -o #{isodir}/#{iso_name}"
           cwd isodir
@@ -143,7 +136,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
     end
 
     execute "Generate mrepo for #{repo_name}" do
-      path ['/usr/bin','/bin']
+      path ['/usr/bin', '/bin']
       if repo_tags['update'] =~ /(?i-mx:now|once)/
         # --[ Update repo at least once ]--
         command "#{mrepo_binary} -gfu \"#{repo_name}\""
@@ -252,7 +245,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
     end
     dir_to_remove = %W(#{wwwdir}/#{repo_name} #{srcdir}/#{repo_name})
     dir_to_remove.each do |dir|
-      directory "#{dir}" do
+      directory dir do
         recursive true
 
         action :delete
