@@ -58,7 +58,7 @@ default[:mrepo][:conf][:main] = {
   # Set lftp options
   'lftp-commands' => '',
   # Add extra options to lftp mirror command
-  'lftp-mirror-options' => '-c -P',
+  'lftp-mirror-options' => '-c -P --delete-first',
   # Clean up packages that are not on the sending side ?
   'lftp-cleanup' => 'yes',
 
