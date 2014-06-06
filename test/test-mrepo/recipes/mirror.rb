@@ -15,9 +15,9 @@ node.default[:mrepo][:repo] = {
     'action'     => 'create',
     'release'    => 6,
     'name'       => 'Repository CentOS $release minimal for Deploying servers',
-    'iso'        => 'CentOS-6.4-x86_64-minimal.iso',
+    'iso'        => 'CentOS-*-x86_64-minimal.iso',
     'iso_md5sum' => 'ftp://ftp.free.fr/mirrors/ftp.centos.org/6/isos/x86_64/md5sum.txt',
-    'iso_url'    => [ 'ftp://ftp.free.fr/mirrors/ftp.centos.org/6/isos/x86_64/CentOS-6.4-x86_64-minimal.iso', ],
+    'iso_url'    => ['ftp://ftp.free.fr/mirrors/ftp.centos.org/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso'],
     'centosplus' => 'ftp://ftp.free.fr/mirrors/ftp.centos.org/6/centosplus/x86_64/Packages',
   },
 }
