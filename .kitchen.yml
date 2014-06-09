@@ -5,7 +5,6 @@ provisioner:
   require_chef_omnibus: true
   chef_omnibus_url: 'http://repo-par.criteo.prod:8080/omnibus_install.sh'
 
-
 platforms:
 - name: centos-6.4
   driver_config:
