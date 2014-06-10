@@ -92,6 +92,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
         group 'root'
         mode '0644'
         source key_url
+        backup false
       end
     end
 
@@ -106,6 +107,7 @@ node[:mrepo][:repo].each do | repo_name, repo_tags |
           mode '0644'
           source repo_tags['iso_md5sum']
           not_if { repo_tags['iso_md5sum'].nil? }
+          backup false
         end
 
         execute "Getting iso: #{iso_name}" do

@@ -17,8 +17,8 @@ node.default[:mrepo][:repo] = {
     'release'    => 6,
     'name'       => 'Repository CentOS $release minimal for Deploying servers',
     'iso'        => 'CentOS-*-x86_64-minimal.iso',
-    'iso_md5sum' => "#{centos_url}/$release/isos/$arch/md5sum.txt",
-    'iso_url'    => ["#{centos_url}/$release/isos/$arch/CentOS-6.5-x86_64-minimal.iso"],
+    'iso_md5sum' => "#{centos_url}/6/isos/x86_64/md5sum.txt",
+    'iso_url'    => ["#{centos_url}/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso"],
     'extras'     => "#{centos_url}/$release/extras/$arch/Packages/",
   },
 }
