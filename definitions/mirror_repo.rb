@@ -43,6 +43,7 @@ define :mirror_repo,
     mrepo_config_file = "#{confdir}/#{repo_name}.conf"
 
     # --[ Check arguments ]--
+    cron_hour     = node[:mrepo][:mirror]['cron_hour']
     minute_random = (node[:mrepo][:mirror]['minute_ip'] + repo_name.sum) % 60
     array_action  = [repo_tags['action']]
     array_update  = [repo_tags['update']]
@@ -195,7 +196,7 @@ define :mirror_repo,
         end
 
         cron "Nightly synchronize repo #{repo_name}" do
-          hour '0'
+          hour cron_hour
           minute minute_random
           path '/bin:/usr/bin'
           command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* 2> /dev/null || true ) && #{mrepo_binary} -gfu \"#{repo_name}\" > /dev/null 2>&1"
@@ -222,7 +223,7 @@ define :mirror_repo,
         # --[ Update repo is done every week ]--
         cron "Weekly synchronize repo #{repo_name}" do
           weekday '0'
-          hour '0'
+          hour cron_hour
           minute minute_random
           path "/bin:/usr/bin"
           command "[ -f \"#{mrepo_config_file}\" ] && (umount #{wwwdir}/#{repo_name}*/disc* || true ) && #{mrepo_binary} -gfu \"#{repo_name}\" > /dev/null 2>&1"

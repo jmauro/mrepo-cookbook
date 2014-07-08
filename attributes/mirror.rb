@@ -7,18 +7,19 @@
 #
 
 # --[ Default option ]--
-ip1, ip2, ip3, ip4                   = node[:ipaddress].split('.')
-default[:mrepo][:mirror]['arch']     = node[:mrepo][:arch]
-default[:mrepo][:mirror]['update']   = 'daily'
-default[:mrepo][:mirror]['action']   = 'create'
-default[:mrepo][:mirror]['metadata'] = 'repomd'
-default[:mrepo][:mirror]['timeout']  = '3600'
-default[:mrepo][:mirror]['minute_ip'] = (ip4.to_i * 256 + ip3.to_i ) % 60
+ip1, ip2, ip3, ip4                    = node[:ipaddress].split('.')
+default[:mrepo][:mirror]['arch']      = node[:mrepo][:arch]
+default[:mrepo][:mirror]['update']    = 'daily'
+default[:mrepo][:mirror]['action']    = 'create'
+default[:mrepo][:mirror]['metadata']  = 'repomd'
+default[:mrepo][:mirror]['timeout']   = '3600'
+default[:mrepo][:mirror]['cron_hour'] = '*/12'
+default[:mrepo][:mirror]['minute_ip'] = (ip4.to_i * 256 + ip3.to_i) % 60
 
 # --[ Options set ]--
 default[:mrepo][:mirror][:options_set] = {
-  :action => [ 'create', 'delete' ],
-  :update => [ 'now', 'weekly', 'nightly', 'never', 'daily', 'once',  ],
+  :action => ['create', 'delete'],
+  :update => ['now', 'weekly', 'nightly', 'never', 'daily', 'once'],
 }
 
 
