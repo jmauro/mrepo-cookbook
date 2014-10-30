@@ -121,13 +121,15 @@ define :mirror_repo,
         iso_url.each do | iso_dvd |
           iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
           # --[ Gettin md5sum file if given by user ]--
-          remote_file "#{isodir}/#{iso_name}.md5sum" do
-            owner 'root'
-            group 'root'
-            mode '0644'
-            source repo_tags['iso_md5sum']
-            not_if { repo_tags['iso_md5sum'].nil? }
-            backup false
+          unless repo_tags['iso_md5sum'].nil?
+            FC = 'notest'
+            remote_file "#{isodir}/#{iso_name}.md5sum" do
+              owner 'root'
+              group 'root'
+              mode '0644'
+              source repo_tags['iso_md5sum']
+              backup false
+            end
           end
 
           execute "Getting iso: #{iso_name}" do
