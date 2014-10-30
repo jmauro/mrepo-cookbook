@@ -250,9 +250,9 @@ define :mirror_repo,
       end
       execute "Unmount any mirrored ISOs for #{repo_name}" do
         path ['/usr/bin', '/bin', '/usr/sbin', '/sbin']
-        command "umount #{wwwdir}/#{repo_name}*/disc*"
-        user "root"
-        group "root"
+        command "umount #{wwwdir}/#{repo_name}*/disc* || true"
+        user 'root'
+        group 'root'
         only_if "/bin/mount | /bin/grep #{wwwdir}/#{repo_name} | grep disc"
 
         notifies :write, "log[Unmounting iso #{repo_name}]"
