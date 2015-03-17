@@ -1,4 +1,6 @@
-# A sample Gemfile
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-gem 'goag', :git => 'https://gitlab.criteois.lan/ruby-gems/goag.git/'
+gem 'test-kitchen'
+gem 'kitchen-vagrant'
+gem 'kitchen-vagrant_winrm'
+gem 'goag', :git => 'https://gitlab.criteois.lan/ruby-gems/goag.git'

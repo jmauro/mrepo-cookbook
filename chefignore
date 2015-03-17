@@ -1,73 +1,94 @@
+# Put files/directories that should be ignored in this file when uploading
+# or sharing to the community site.
+# Lines that start with '# ' are comments.
+
+# OS generated files #
+######################
+.DS_Store
+Icon?
+nohup.out
+ehthumbs.db
+Thumbs.db
+
+# SASS #
+########
+.sass-cache
+
+# EDITORS #
+###########
+\#*
+.#*
+*~
+*.sw[a-z]
 *.bak
-*.class
-*.com
-*.dll
-*.exe
+REVISION
+TAGS*
+tmtags
+*_flymake.*
+*_flymake
+*.tmproj
+.project
+.settings
+mkmf.log
+
+## COMPILED ##
+##############
+a.out
 *.o
 *.pyc
 *.so
-*.sw[a-z]
-*.tmproj
-*/.bzr/*
-*/.git
-*/.hg/*
-*/.svn/*
+*.com
+*.class
+*.dll
+*.exe
 */rdoc/
-*/test/*
-*_flymake
-*_flymake.*
-*~
-.#*
-.DS_Store
-.colander
-.git
-.gitattributes
-.gitconfig
-.gitignore
-.gitmodules
-.kitchen
-.kitchen.yml
-.project
-.rspec
-.sass-cache
-.settings
-.strainer
-.svn
-.travis.yml
-.vagrant
+
+# Testing #
+###########
 .watchr
-/tools
-Berksfile
-Berksfile.lock
-CHANGELOG*
-CONTRIBUTING
-Colanderfile
-Gemfile
-Gemfile.lock
-Guardfile
-Icon?
-Procfile
-REVISION
-Rakefile
-Strainerfile
-TAGS*
-Thumbs.db
-Vagrantfile
-\#*
-\.gitignore
-\.travis.yml
-a.out
-cookbooks/*
-ehthumbs.db
-features/*
-mkmf.log
-nohup.out
-php/
+.rspec
 spec/*
 spec/fixtures/*
 test/*
+features/*
+Guardfile
+Procfile
+
+# SCM #
+#######
+.git
+*/.git
+.gitignore
+.gitmodules
+.gitconfig
+.gitattributes
+.svn
+*/.bzr/*
+*/.hg/*
+*/.svn/*
+
+# Berkshelf #
+#############
+cookbooks/*
 tmp
-tmtags
-vendor
-vendor/
-vendor/*
+
+# Cookbooks #
+#############
+CONTRIBUTING
+CHANGELOG*
+
+# Strainer #
+############
+Colanderfile
+Strainerfile
+.colander
+.strainer
+
+# Vagrant #
+###########
+.vagrant
+Vagrantfile
+
+# Travis #
+##########
+.travis.yml
