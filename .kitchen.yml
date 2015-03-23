@@ -10,6 +10,7 @@ platforms:
     chef_omnibus_url: http://repo-par.criteo.prod:8080/omnibus_install.sh
   driver_config:
     box: opscode-centos-6.5
+    box_url: http://filer.criteo.prod/boxes/opscode-centos-6.5.box
 - name: windows-2008r2
   driver_plugin: vagrant_winrm
   provisioner:
