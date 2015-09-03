@@ -13,7 +13,7 @@ default[:mrepo][:mirror]['update']    = 'daily'
 default[:mrepo][:mirror]['action']    = 'create'
 default[:mrepo][:mirror]['metadata']  = 'repomd'
 default[:mrepo][:mirror]['timeout']   = '3600'
-default[:mrepo][:mirror]['cron_hour'] = '*/12'
+default[:mrepo][:mirror]['cron_hour'] = '*/4'
 default[:mrepo][:mirror]['minute_ip'] = (ip4.to_i * 256 + ip3.to_i) % 60
 
 # --[ Options set ]--
