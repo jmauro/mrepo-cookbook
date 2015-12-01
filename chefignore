@@ -51,8 +51,11 @@ spec/*
 spec/fixtures/*
 test/*
 features/*
+examples/*
 Guardfile
 Procfile
+.kitchen*
+.rubocop.yml
 
 # SCM #
 #######
@@ -69,13 +72,16 @@ Procfile
 
 # Berkshelf #
 #############
+Berksfile
+Berksfile.lock
 cookbooks/*
 tmp
 
 # Cookbooks #
 #############
-CONTRIBUTING
+CONTRIBUTING*
 CHANGELOG*
+TESTING*
 
 # Strainer #
 ############

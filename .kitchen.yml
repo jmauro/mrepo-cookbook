@@ -1,35 +1,32 @@
 ---
-driver_plugin: vagrant
+driver:
+  name: vagrant
+
 provisioner:
   name: chef_zero
+
 platforms:
-- name: centos-6.5
+- name: centos-6.6
   provisioner:
     require_chef_omnibus: true
-    chef_omnibus_url: http://repo-par.criteo.prod:8080/omnibus_install.sh
+    chef_omnibus_url:     'http://repo-par.criteo.prod/omnibus_install.sh'
   driver_config:
-    box: opscode-centos-6.5
-    box_url: http://filer.criteo.prod/boxes/opscode-centos-6.5.box
-- name: windows-2008r2
-  provisioner:
-    sudo: false
-    root_path: C:/var/chef
-    chef_client_path: C:/opscode/chef/bin/chef-client
-    chef_omnibus_root: C:/opscode/chef/bin
-    ruby_bindir: C:/opscode/chef/embedded/bin
+    box:     opscode-centos-6.6
+    box_url: http://filer.criteo.prod/boxes/opscode_centos-6.6.box
+
+- name: windows-2012r2
   driver_config:
-    vm_hostname: false
+    # Enable provision for custom omnibus
     communicator: winrm
     customize:
       vrde: 'on'
-      vrdeport: 5000-5100
+      vrdeport: '5000-5100'
       vrdeauthtype: 'null'
-    provision: true
-    box: windows-2008r2-web-chef-11_16_4
-    box_url: http://filer.criteo.prod/boxes/windows-2008r2-web-chef-11_16_4.box
+    box:     windows-2012r2-standard-chef-12_4_1
+    box_url: http://filer.criteo.prod/boxes/windows-2012r2-standard-chef-12_4_1.box
 suites:
 - name: default
-  excludes: windows-2008r2
+  excludes: windows-2012r2
   run_list:
   - recipe[test-mrepo::mirror]
   attributes:
