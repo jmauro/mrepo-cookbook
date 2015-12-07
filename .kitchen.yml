@@ -14,6 +14,14 @@ platforms:
     box:     opscode-centos-6.6
     box_url: http://filer.criteo.prod/boxes/opscode_centos-6.6.box
 
+- name: centos-7.1
+  provisioner:
+    require_chef_omnibus: true
+    chef_omnibus_url:     'http://repo-par.criteo.prod/omnibus_install.sh'
+  driver_config:
+    box:     opscode-centos-7.1
+    box_url: http://filer.criteo.prod/boxes/opscode_centos-7.1.box
+
 - name: windows-2012r2
   driver_config:
     # Enable provision for custom omnibus
