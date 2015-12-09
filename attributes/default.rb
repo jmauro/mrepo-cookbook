@@ -8,7 +8,10 @@
 #
 
 # --[ Packages definition ]--
-default[:mrepo][:packages] = [ 'mrepo', 'rsync', 'lftp', 'createrepo', 'hardlink', 'repoview', 'yum-arch', 'fuse', 'curl', 'wget', ]
+default[:mrepo][:packages] = [ 'mrepo', 'rsync', 'lftp', 'createrepo', 'hardlink', 'repoview', 'fuse', 'curl', 'wget', ]
+
+# Only to handle Fedora Core < 3 and RedHat Enterprise Linux < 4.
+default[:mrepo][:packages] << 'yum-arch' if node[:platform_version].to_i < 7
 
 # --[ Pkgs default directory structure ]--
 default[:mrepo][:dir] = {

@@ -62,4 +62,4 @@ execute 'Checking loop device number' do
   not_if 'test -r /dev/loop255'
 
   action :run
-end
+end if node['platform_version'].to_i < 7
