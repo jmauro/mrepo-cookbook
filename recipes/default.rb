@@ -25,8 +25,8 @@ template node[:mrepo][:file][:conf] do
   group 'root'
   mode  '0644'
   variables(
-    :section => 'main',
-    :mrepo   => node[:mrepo][:conf][:main],
+    section: 'main',
+    mrepo: node['mrepo']['conf']['main'],
   )
 end
 
@@ -37,7 +37,7 @@ template node[:mrepo][:file][:logrotate] do
   group 'root'
   mode  '0644'
   variables(
-    :mrepo => node[:mrepo],
+    mrepo: node['mrepo'],
   )
 end
 

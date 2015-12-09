@@ -8,18 +8,18 @@
 #
 
 # --[ Packages definition ]--
-default[:mrepo][:packages] = [ 'mrepo', 'rsync', 'lftp', 'createrepo', 'hardlink', 'repoview', 'fuse', 'curl', 'wget', ]
+default['mrepo']['packages'] = %w(mrepo rsync lftp createrepo hardlink repoview fuse curl wget)
 
 # Only to handle Fedora Core < 3 and RedHat Enterprise Linux < 4.
 default[:mrepo][:packages] << 'yum-arch' if node[:platform_version].to_i < 7
 
 # --[ Pkgs default directory structure ]--
-default[:mrepo][:dir] = {
-  :configdir => '/etc/mrepo.conf.d',
-  :srcdir    => '/var/mrepo',
-  :wwwdir    => '/var/www/mrepo',
-  :lockdir   => '/var/run/mrepo',
-  :cachedir  => '/var/cache/mrepo',
+default['mrepo']['dir'] = {
+  configdir: '/etc/mrepo.conf.d',
+  srcdir: '/var/mrepo',
+  wwwdir: '/var/www/mrepo',
+  lockdir: '/var/run/mrepo',
+  cachedir: '/var/cache/mrepo',
 }
 default[:mrepo][:dir][:iso]      = "#{node[:mrepo][:dir][:srcdir]}/iso"
 default[:mrepo][:dir][:key]      = "#{node[:mrepo][:dir][:wwwdir]}/RPM-GPG-KEY"
