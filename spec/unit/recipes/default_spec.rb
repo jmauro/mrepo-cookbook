@@ -14,6 +14,7 @@ describe 'mrepo::default' do
     end
 
     it 'converges successfully' do
+      stub_command('test -r /dev/loop255').and_return(0)
       expect { chef_run }.to_not raise_error
     end
   end
