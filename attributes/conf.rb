@@ -34,7 +34,7 @@ default[:mrepo][:conf][:main] = {
   'mailto' => 'root@localhost',
 
   ## SMTP servers
-  'smtp_server' => 'localhost',
+  'smtp-server' => 'localhost',
 
   ## Default output (put this to yes if you want mrepo to be silent by default)
   'quiet' => 'no',
