@@ -11,7 +11,11 @@ def ck(name)
 end
 
 %w(
-  criteo-location
   criteo-ipam
+  criteo-location
+  dmi
+  hp
+  lldp
+  network
   yum-criteo
 ).each {|name| ck(name) }
