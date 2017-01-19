@@ -102,19 +102,6 @@ define :mirror_repo,
         notifies :write, "log[Adding #{repo_name}]"
       end
 
-      unless repo_tags['key_url'].nil?
-        key_url = repo_tags['key_url']
-        key_name = /.*\/(.*)$/.match(key_url)[1]
-        key_name = repo_tags['key_name'] if repo_tags['key_name']
-        remote_file "#{keydir}/#{key_name}" do
-          owner 'root'
-          group 'root'
-          mode '0644'
-          source key_url
-          backup false
-        end
-      end
-
       unless repo_tags['iso_url'].nil?
         iso_url = repo_tags['iso_url']
 
@@ -175,15 +162,27 @@ define :mirror_repo,
         notifies :write, "log[Generating #{repo_name}]"
       end
 
+      if repo_tags['key_url']
+        key_url = repo_tags['key_url']
+        key_name = /.*\/(.*)$/.match(key_url)[1]
+        key_name = repo_tags['key_name'] if repo_tags['key_name']
+        cron "Synchronize gpg key #{key_name}" do
+          command %(curl -L -s -S '#{key_url}' --output "#{keydir}/#{key_name}")
+          hour cron_hour
+          minute minute_random
+          weekday '0' if repo_tags['update'] =~ /(?i-mx:weekly)/
+          user 'root'
+          action :delete if repo_tags['update'] =~ /(?i-mx:once)/
+        end
+      end
+
       if repo_tags['update'] =~ /(?i-mx:once)/
         # --[ Removing Crons ]--
         cron "Nightly synchronize repo #{repo_name}" do
-
           action :delete
         end
 
         cron "Weekly synchronize repo #{repo_name}" do
-
           action :delete
         end
 
