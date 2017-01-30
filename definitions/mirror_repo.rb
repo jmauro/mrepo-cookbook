@@ -107,13 +107,13 @@ define :mirror_repo,
 
         iso_url.each do | iso_dvd |
           iso_name = /.*\/(.*)$/.match(iso_dvd)[1]
-          # --[ Gettin md5sum file if given by user ]--
-          unless repo_tags['iso_md5sum'].nil? # ~FC023
-            remote_file "#{isodir}/#{iso_name}.md5sum" do
+          # --[ Gettin sha256sum file if given by user ]--
+          unless repo_tags['iso_sha256sum'].nil? # ~FC023
+            remote_file "#{isodir}/#{iso_name}.sha256sum" do
               owner 'root'
               group 'root'
               mode '0644'
-              source repo_tags['iso_md5sum']
+              source repo_tags['iso_sha256sum']
               backup false
             end
           end
@@ -123,9 +123,9 @@ define :mirror_repo,
             # --[ Make sure iso not mounted when downloading it ]--
             command "(losetup --show -f #{isodir}/#{iso_name} >/dev/null 2>&1 && umount #{isodir}/#{iso_name} 2>/dev/null >&2 || true) && curl -s -S #{iso_dvd} -o #{isodir}/#{iso_name}"
             cwd isodir
-            # --[ Chekcing if md5sum file is present if not test the iso file ]--
-            if ::File.exist?("#{isodir}/#{iso_name}.md5sum")
-              not_if "cd #{isodir} && grep #{iso_name} #{iso_name}.md5sum | md5sum -c"
+            # --[ Chekcing if sha256sum file is present if not test the iso file ]--
+            if ::File.exist?("#{isodir}/#{iso_name}.sha256sum")
+              not_if "cd #{isodir} && grep #{iso_name} #{iso_name}.sha256sum | sha256sum -c"
             else
               creates "#{isodir}/#{iso_name}"
             end
