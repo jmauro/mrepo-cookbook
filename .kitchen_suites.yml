@@ -1,0 +1,6 @@
+- name: default
+  excludes: windows-2012r2
+  run_list:
+  - recipe[yum-criteo]
+  - recipe[test-mrepo::mirror]
+  attributes:

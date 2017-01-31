@@ -1,0 +1,71 @@
+---
+# The following environment variables are required:
+# - AWS_ACCESS_KEY_ID
+# - AWS_SECRET_ACCESS_KEY
+# - AWS_SSH_KEY_ID
+# - AWS_REGION
+#
+# Optional environment variables:
+# - AWS_SECURITY_GROUP
+# - AWS_SUBNET
+
+<% puts "Loading local environment variables from '.env' files"; require 'dotenv'; Dotenv.load; %>
+<% ENV['AWS_SSH_KEY_ID'] = ENV['CRITEO_USER'] || ENV['USER']; %>
+<% fail "ERROR: Was not able to establish the value to use for ENV['AWS_SSH_KEY_ID']" if ( ENV['AWS_SSH_KEY_ID'].nil? || ENV['AWS_SSH_KEY_ID'].empty? ) %>
+
+driver:
+  name: ec2
+  require_chef_omnibus: 12.8.1
+  instance_type: t2.micro
+  associate_public_ip: true
+  iam_profile_name: test-kitchen
+  region: <%= ENV['AWS_REGION'] || 'us-west-2' %>
+  tags:
+    created-by: <%= ENV['AWS_SSH_KEY_ID'] %>
+  subnet_filter:
+    tag:   'Name'
+    value: <%= ENV['AWS_SUBNET'] || 'chef-testing-closedsource-gw-vpc-subnet' %>
+  security_group_filter:
+    tag:   'Name'
+    value: <%= ENV['AWS_SECURITY_GROUP'] || 'node-security-group' %>
+  block_device_mappings:
+    - device_name: /dev/sda1
+      ebs:
+        volume_type: gp2
+        delete_on_termination: true
+transport:
+  ssh_key: <%= ENV['AWS_JENKINS_PRIVATE_KEY'] || File.join(ENV['HOME'], '.ssh/id_rsa') %>
+
+provisioner:
+  name: chef_zero
+  attributes:
+    kitchen_ohai:
+      values:
+        location:
+          datacenter: PAR
+    authorization:
+      sudo:
+        users:
+          - centos
+
+platforms:
+- name: centos-6
+  transport:
+    name: speedy_ssh
+  driver:
+    image_id: ami-62c10602
+- name: centos-7
+  transport:
+    name: speedy_ssh
+  driver:
+    image_id: ami-7d0fc81d
+- name: windows-2012r2
+  transport:
+    elevated: true
+    elevated_username: System
+    elevated_password: null
+  driver:
+    image_id: ami-f1854491
+
+suites:
+<%= require 'erubis'; Erubis::Eruby.new(File.read('.kitchen_suites.yml')).evaluate %>

@@ -19,3 +19,4 @@ end
   network
   yum-criteo
 ).each {|name| ck(name) }
+cookbook 'kitchen-ohai' # required for ec2

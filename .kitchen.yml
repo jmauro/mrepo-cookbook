@@ -4,40 +4,40 @@ driver:
 
 provisioner:
   name: chef_zero
+  attributes:
+    authorization:
+      sudo:
+        users:
+          - vagrant
 
 platforms:
-- name: centos-6.6
+- name: centos-6
+  transport:
+    name: speedy_ssh
   provisioner:
-    require_chef_omnibus: true
     chef_omnibus_url:     'http://repo-par.criteo.prod/omnibus_install.sh'
   driver_config:
-    box:     opscode-centos-6.6
-    box_url: http://filer.criteo.prod/boxes/opscode_centos-6.6.box
+    box:     opscode-centos-6.7
+    box_url: http://filer.criteo.prod/boxes/opscode_centos-6.7.box
 
-- name: centos-7.1
+- name: centos-7
+  transport:
+    name: speedy_ssh
   provisioner:
-    require_chef_omnibus: true
     chef_omnibus_url:     'http://repo-par.criteo.prod/omnibus_install.sh'
   driver_config:
-    box:     opscode-centos-7.1
-    box_url: http://filer.criteo.prod/boxes/opscode_centos-7.1.box
+    box:     criteo-centos-7.2-core
+    box_url: http://filer.criteo.prod/boxes/criteo-centos-7.2-core.box
 
 - name: windows-2012r2
+  transport:
+    name: winrm
+    elevated: true
+    elevated_username: System
+    elevated_password: null
   driver_config:
-    # Enable provision for custom omnibus
-    communicator: winrm
-    customize:
-      vrde: 'on'
-      vrdeport: '5000-5100'
-      vrdeauthtype: 'null'
-    box:     windows-2012r2-standard-chef-12_4_1
-    box_url: http://filer.criteo.prod/boxes/windows-2012r2-standard-chef-12_4_1.box
+    box: criteo-windows-2012r2-standard
+    box_url: http://filer.criteo.prod/boxes/criteo-windows-2012r2-standard.box
+
 suites:
-- name: default
-  excludes: windows-2012r2
-  run_list:
-  - recipe[yum-criteo]
-  - recipe[test-mrepo::mirror]
-  attributes:
-driver:
-  name: vagrant
+<%= require 'erubis'; Erubis::Eruby.new(File.read('.kitchen_suites.yml')).evaluate %>
