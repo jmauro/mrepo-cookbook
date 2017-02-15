@@ -167,7 +167,7 @@ define :mirror_repo,
         key_name = /.*\/(.*)$/.match(key_url)[1]
         key_name = repo_tags['key_name'] if repo_tags['key_name']
         cron "Synchronize gpg key #{key_name}" do
-          command %(curl -L -s -S '#{key_url}' --output "#{keydir}/#{key_name}")
+          command %(curl -f -L -s -S '#{key_url}' --output "#{keydir}/#{key_name}")
           hour cron_hour
           minute minute_random
           weekday '0' if repo_tags['update'] =~ /(?i-mx:weekly)/
