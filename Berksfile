@@ -1,10 +1,9 @@
-source "https://supermarket.chef.io"
-
+source 'https://supermarket.chef.io'
 
 metadata
 
 # Test recipes
-cookbook 'test-mrepo', :path => './test/test-mrepo'
+cookbook 'test-mrepo', path: './test/test-mrepo'
 
 def ck(name)
   cookbook name, git: "https://gitlab.criteois.com/chef-cookbooks/#{name}.git"
@@ -18,5 +17,5 @@ end
   lldp
   network
   yum-criteo
-).each {|name| ck(name) }
+).each { |name| ck(name) }
 cookbook 'kitchen-ohai' # required for ec2

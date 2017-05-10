@@ -8,27 +8,27 @@
 #
 
 # [ SECTION MAIN ]
-default[:mrepo][:conf][:main] = {
+default['mrepo']['conf']['main'] = {
   ## Architecture to get
-  'arch'                => node[:mrepo][:arch],
+  'arch'                => node['mrepo']['arch'],
 
   # The location of the ISO images and RPM files
-  'srcdir'              => node[:mrepo][:dir][:srcdir],
+  'srcdir'              => node['mrepo']['dir']['srcdir'],
 
   ## The location of the generated repositories
-  'wwwdir'              => node[:mrepo][:dir][:wwwdir],
+  'wwwdir'              => node['mrepo']['dir']['wwwdir'],
 
   ## The location of the dist config files
-  'confdir'             => node[:mrepo][:dir][:configdir],
+  'confdir'             => node['mrepo']['dir']['configdir'],
 
   ## The location of the cachedir (used by yum)
-  'cachedir'            => node[:mrepo][:dir][:cachedir],
+  'cachedir'            => node['mrepo']['dir']['cachedir'],
 
   ## The location of the lockdir
-  'lockdir'             => node[:mrepo][:dir][:lockdir],
+  'lockdir'             => node['mrepo']['dir']['lockdir'],
 
   ## The location of the logfile
-  'logfile'             => node[:mrepo][:file][:log],
+  'logfile'             => node['mrepo']['file']['log'],
 
   ## Sent report to
   'mailto'              => 'root@localhost',

@@ -7,36 +7,35 @@
 #
 
 # --[ Default option ]--
-ip1, ip2, ip3, ip4                    = node[:ipaddress].split('.')
-default[:mrepo][:mirror]['arch']      = node[:mrepo][:arch]
-default[:mrepo][:mirror]['update']    = 'daily'
-default[:mrepo][:mirror]['action']    = 'create'
-default[:mrepo][:mirror]['metadata']  = 'repomd'
-default[:mrepo][:mirror]['timeout']   = '3600'
-default[:mrepo][:mirror]['cron_hour'] = '*/4'
-default[:mrepo][:mirror]['minute_ip'] = (ip4.to_i * 256 + ip3.to_i) % 60
+ip3, ip4 = node['ipaddress'].split('.').last(2)
+default['mrepo']['mirror']['arch']      = node['mrepo']['arch']
+default['mrepo']['mirror']['update']    = 'daily'
+default['mrepo']['mirror']['action']    = 'create'
+default['mrepo']['mirror']['metadata']  = 'repomd'
+default['mrepo']['mirror']['timeout']   = '3600'
+default['mrepo']['mirror']['cron_hour'] = '*/4'
+default['mrepo']['mirror']['minute_ip'] = (ip4.to_i * 256 + ip3.to_i) % 60
 
 # --[ Options set ]--
-default[:mrepo][:mirror][:options_set] = {
-  :action => ['create', 'delete'],
-  :update => ['now', 'weekly', 'nightly', 'never', 'daily', 'once'],
+default['mrepo']['mirror']['options_set'] = {
+  action: %w(create delete),
+  update: %w(now weekly nightly never daily once),
 }
 
-
 ## --[ Repository to mirror definition ]--
-#default[:mrepo][:repo] = {
+# default['mrepo']['repo'] = {
 #  'epel-CentOS-6' => {
 #    # --[ Generic options linked to the repo ]--
 #    'name'     => 'Repository Extra Packages for Enterprise Linux 6',
 #    'release'  => '6',
-#    'arch'     => node[:mrepo][:mirror]['arch'],
-#    'update'   => node[:mrepo][:mirror]['update'],
-#    'metadata' => node[:mrepo][:mirror]['metadata'],
-#    'action'   => node[:mrepo][:mirror]['action'],
+#    'arch'     => node['mrepo']['mirror']['arch'],
+#    'update'   => node['mrepo']['mirror']['update'],
+#    'metadata' => node['mrepo']['mirror']['metadata'],
+#    'action'   => node['mrepo']['mirror']['action'],
 #    'key_url'  => 'http://fr2.rpmfind.net/linux/epel/RPM-GPG-KEY-EPEL-6',
 #    # --[ Repository definition ]--
 #    'epel'     => 'rsync://mirror.i3d.net/fedora-epel/6/$arch',
 #  },
-#}
+# }
 
-default[:mrepo][:repo] = Hash.new
+default['mrepo']['repo'] = {}

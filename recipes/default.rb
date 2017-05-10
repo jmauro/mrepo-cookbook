@@ -19,31 +19,31 @@ node[:mrepo][:packages].each do |pkg|
   end
 end
 
-template node[:mrepo][:file][:conf] do
+template node['mrepo']['file']['conf'] do
   source 'mrepo.conf.erb'
   owner 'root'
   group 'root'
   mode  '0644'
   variables(
     section: 'main',
-    mrepo: node['mrepo']['conf']['main'],
+    mrepo:   node['mrepo']['conf']['main']
   )
 end
 
 # --[ Since 'mrepo' deploys one configuration file ]--
-template node[:mrepo][:file][:logrotate] do
+template node['mrepo']['file']['logrotate'] do
   source 'mrepo.logrotate.erb'
   owner 'root'
   group 'root'
   mode  '0644'
   variables(
-    mrepo: node['mrepo'],
+    mrepo: node['mrepo']
   )
 end
 
 # --[ Make sure directory are present                          ]--
 # --[ NOTE:  "sort" is not needed since "recursive" is present ]--
-node[:mrepo][:dir].sort { |a, b| a[1] <=> b[1] }.each do |name, path|
+node['mrepo']['dir'].sort { |a, b| a[1] <=> b[1] }.each do |_name, path|
   directory path do
     owner 'root'
     group 'root'
@@ -55,11 +55,13 @@ node[:mrepo][:dir].sort { |a, b| a[1] <=> b[1] }.each do |name, path|
 end
 
 # --[ Make sure loopdevice exist ]--
-execute 'Checking loop device number' do
-  path ['/sbin', '/usr/sbin', '/bin', '/usr/bin']
-  # --[ Create 256 loop devices ]--
-  command 'MAKEDEV -v /dev/loop'
-  not_if 'test -r /dev/loop255'
+if node['platform_version'].to_i < 7
+  execute 'Checking loop device number' do
+    path ['/sbin', '/usr/sbin', '/bin', '/usr/bin']
+    # --[ Create 256 loop devices ]--
+    command 'MAKEDEV -v /dev/loop'
+    not_if 'test -r /dev/loop255'
 
-  action :run
-end if node['platform_version'].to_i < 7
+    action :run
+  end
+end
