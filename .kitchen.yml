@@ -20,24 +20,5 @@ platforms:
     box:     opscode-centos-6.7
     box_url: http://filer.criteo.prod/boxes/opscode_centos-6.7.box
 
-- name: centos-7
-  transport:
-    name: speedy_ssh
-  provisioner:
-    chef_omnibus_url:     'http://repo-par.criteo.prod/omnibus_install.sh'
-  driver_config:
-    box:     criteo-centos-7.2-core
-    box_url: http://filer.criteo.prod/boxes/criteo-centos-7.2-core.box
-
-- name: windows-2012r2
-  transport:
-    name: winrm
-    elevated: true
-    elevated_username: System
-    elevated_password: null
-  driver_config:
-    box: criteo-windows-2012r2-standard
-    box_url: http://filer.criteo.prod/boxes/criteo-windows-2012r2-standard.box
-
 suites:
 <%= require 'erubis'; Erubis::Eruby.new(File.read('.kitchen_suites.yml')).evaluate %>

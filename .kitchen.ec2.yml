@@ -54,18 +54,6 @@ platforms:
     name: speedy_ssh
   driver:
     image_id: ami-62c10602
-- name: centos-7
-  transport:
-    name: speedy_ssh
-  driver:
-    image_id: ami-7d0fc81d
-- name: windows-2012r2
-  transport:
-    elevated: true
-    elevated_username: System
-    elevated_password: null
-  driver:
-    image_id: ami-f1854491
 
 suites:
 <%= require 'erubis'; Erubis::Eruby.new(File.read('.kitchen_suites.yml')).evaluate %>
