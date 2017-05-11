@@ -156,6 +156,19 @@ define :mirror_repo,
       key_url = repo_tags['key_url']
       key_name = %r{.*\/(.*)$}.match(key_url)[1]
       key_name = repo_tags['key_name'] if repo_tags['key_name']
+
+      remote_file "initial sync of the gpg key #{key_url}" do
+        path "#{keydir}/#{key_name}"
+        source key_url
+        owner 'root'
+        group 'root'
+        mode '0644'
+        action :create_if_missing
+      end
+
+      # we don't want a transient failure of gpg key fetching to break chef run
+      # so refresh is offloaded to cron
+      # remote_file above guarantees we have a successful initial sync
       cron "Synchronize gpg key #{key_name}" do
         command %(curl -f -L -s -S '#{key_url}' --output "#{keydir}/#{key_name}")
         hour cron_hour
